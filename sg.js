@@ -10,9 +10,7 @@ function SGData(id, set, val) {
   
 */
 function SG() {
-  SG.prototype.create = function(data, svgEl) {
-    if (arguments.callee.caller.name != 'SG') 
-      return; //is this really necessary?
+  var create = function(data, svgEl) {
     this.data = data;
     this.el = svgEl;
     //todo parameterize these
@@ -54,6 +52,7 @@ function SG() {
    
     return this;
   }
+
   // set up sorted data, check bounds ...
   function init(sg) {
     // msort is an all in one big val-sorted list (for bounds checking)
@@ -199,7 +198,8 @@ function SG() {
     parent.setAttribute(name, value);
     return parent;
   }
+  
   if (arguments.length > 1) {
-    SG.prototype.create.apply(this,arguments);
+    create.apply(this,arguments);
   }
 }
