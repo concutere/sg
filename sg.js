@@ -9,27 +9,51 @@ function SGData(id, set, val) {
   [ { id : string, set : number, val : number } ]
   
 */
-function SG(data, svgEl) {
-
-  this.data = data;
-  this.el = svgEl;
-  /* this.sets should have sub-arrays grouped by set, like so
-     not being used yet, but useful for data-binding by column
-    [ // sets
-      [ //set
-        { //SGData
-          ...
-        }, ...
-      ], ...
-    ]
+function SG() {
+  SG.prototype.create = function(data, svgEl) {
+    if (arguments.callee.caller.name != 'SG') 
+      return; //is this really necessary?
+    this.data = data;
+    this.el = svgEl;
+    //todo parameterize these
+    this.height = 500;
+    this.rowh = 20; //todo make relative to font size / text element height
+    this.textw = 200;
+    this.slopew = 100;
+    this.gutterw = 5;
+    this.font = 'Cabin, Arial, Helvetica'; 
+    this.fontSize = 14;
+    this.fontColor = 'darkslategray';
+    this.strokew = 0.5;
+    this.lineColor = 'lightslategray';
     
-  */
-  // this.sorted is sorted by set, then val, then id
-  this.sorted = [];
+    /* this.sets should have sub-arrays grouped by set, like so
+       not being used yet, but useful for data-binding by column
+      [ // sets
+        [ //set
+          { //SGData
+            ...
+          }, ...
+        ], ...
+      ]
+      
+    */
+    // this.sorted is sorted by set, then val, then id
+    this.sorted = [];
   
-  this.msort = []; 
-  this.minv;
-  this.maxv;
+    this.msort = []; 
+    this.minv;
+    this.maxv;
+    init(this);
+    if(svgEl != undefined) {
+      while (svgEl.lastChild) {
+        svgEl.removeChild(svgEl.lastChild);
+      }
+      this.graph(this);
+    }
+   
+    return this;
+  }
   // set up sorted data, check bounds ...
   function init(sg) {
     // msort is an all in one big val-sorted list (for bounds checking)
@@ -67,23 +91,8 @@ function SG(data, svgEl) {
     
     return sg;
   }
-  init(this);
-  //todo parameterize these
-  this.height = 500;
-  this.rowh = 20; //todo make relative to font size / text element height
-  this.textw = 200;
-  this.slopew = 100;
-  this.gutterw = 5;
-  this.font = 'Cabin, Arial, Helvetica'; 
-  this.fontSize = 14;
-  this.fontColor = 'darkslategray';
-  this.strokew = 0.5;
-  this.lineColor = 'lightslategray';
-  if(svgEl != undefined) {
-    graph(this);
-  }
-  
-  function graph(sg) {
+ 
+  SG.prototype.graph = function(sg) {
     var x = 5;
     var y = sg.rowh;
     var set;
@@ -112,7 +121,7 @@ function SG(data, svgEl) {
         thisset = [];
         lastmax = maxtw;
         maxtw = 0;
-        g = sub(svgEl, 'g');
+        g = sub(this.el, 'g');
       }
       if (isNaN(lastval) || lastval < d.val) {
         y += sg.rowh * ((isNaN(lastval) ? sg.maxh : lastval) - d.val) / sg.mind; // todo precalc row heights for data objects
@@ -135,7 +144,7 @@ function SG(data, svgEl) {
       else
         el.textContent = '(' + d.val + ') ' + d.id;
       
-      svgEl.appendChild(el);
+      this.el.appendChild(el);
       var tw = el.getComputedTextLength();
       if (maxtw < tw) maxtw = tw;
         
@@ -143,7 +152,7 @@ function SG(data, svgEl) {
       
       if (s == sg.sorted.length - 1 || sg.sorted[s+1].set != set)
         if(lastset.length > 0)
-          drawSlopes(thisset, lastset, lastmax, sg.rowh, sg.gutterw, sg.lineColor, sg.strokew);
+          this.drawSlopes(thisset, lastset, lastmax, sg.rowh, sg.gutterw, sg.lineColor, sg.strokew);
 
     }
     
@@ -162,13 +171,13 @@ function SG(data, svgEl) {
     */
   }
   
-  function drawSlopes(curr, last, width, height, gutter, color, strokeWidth) {
+  SG.prototype.drawSlopes = function(curr, last, width, height, gutter, color, strokeWidth) {
     if(curr.length < 1 || last.length < 1) return;
     //var g = sub(svgEl, 'g');
     for(var c = 0; c < curr.length; c++) {
       for(var l = 0; l < last.length; l++) {
         if(curr[c].id == last[l].id) {
-          var line = sub(svgEl, 'line');
+          var line = sub(this.el, 'line');
           at(line, 'x1', last[l].x + width + gutter);
           at(line, 'x2', curr[c].x - gutter);
           at(line, 'y1', last[l].y - height/6); // todo the factor of 6 here feels really arbitrary, may break with widely varying font sizes
@@ -189,5 +198,8 @@ function SG(data, svgEl) {
   function at(parent, name, value) {
     parent.setAttribute(name, value);
     return parent;
+  }
+  if (arguments.length > 1) {
+    SG.prototype.create.apply(this,arguments);
   }
 }
