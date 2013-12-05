@@ -157,17 +157,18 @@ function SG() {
     
     /* todo resize based on contents? scale to fit? 
        dynamically create from params?
-
-    var bb = svgEl.getBBox();
+    */
+    var el = sg.el;
+    var bb = sg.el.getBBox();
     var sx = bb.width + bb.x;
     var sy = bb.height + bb.y;
-    if(svgEl.height.baseVal.value < sy) {
-      svgEl.height.baseVal.value = sy;
+    if(isNaN(el.style.height) || el.style.height <= sy) {
+      el.style.height = sy + 5;
     }
-    if(svgEl.width.baseVal.value < sx) {
-      svgEl.width.baseVal.value = sy;
+    if(isNaN(el.style.height) || el.style.width <= sx) {
+      el.style.width = sx + 5;
     }
-    */
+    //*/    
   }
   
   SG.prototype.drawSlopes = function(curr, last, width, height, gutter, color, strokeWidth) {
