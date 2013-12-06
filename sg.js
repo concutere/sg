@@ -149,7 +149,7 @@ function SG() {
  
   SG.prototype.graph = function(sg) {
     var x = 5;
-    var y = sg.rowh;
+    var y = sg.rowh + sg.rowh*2; // padding + headers
     var set;
     var lastval;
     var el;
@@ -170,7 +170,7 @@ function SG() {
           //maxtw = sg.textw;
         }
         set = d.set;
-        y = sg.rowh; 
+        y = sg.rowh + sg.rowh*2; 
         lastval = undefined;
         lastset = thisset;
         thisset = [];
@@ -186,7 +186,7 @@ function SG() {
       at(el, 'id', s);
       at(el,'x',x);
       at(el, 'y',y);
-      at(el, 'text-length', sg.textw);
+      //at(el, 'text-length', sg.textw);
       at(el, 'font-family', sg.font);
       at(el, 'font-size', sg.fontSize);
       at(el, 'fill', sg.fontColor);            
@@ -210,8 +210,17 @@ function SG() {
       thisset.push({'id':d.id, 'x':x, 'y':y});
       
       if (s == sg.sorted.length - 1 || sg.sorted[s+1].set != set) {
+        var setEl = sub(g, 'text');
+        at(setEl, 'id', 'set'+set);
+        at(setEl, 'y', sg.rowh);
+        at(setEl, 'font-family', sg.font);
+        at(setEl, 'font-size', sg.fontSize+2);
+        at(setEl, 'fill', sg.fontColor);
+        setEl.textContent = set;
+        at(setEl, 'x', x + (maxtw / 2 - setEl.getComputedTextLength() / 2));
+        //todo pass on thisset to right/center align text?
         if(lastset.length > 0) {
-          this.drawSlopes(thisset, lastset, lastmax, sg.rowh, sg.gutterw, sg.lineColor, sg.strokew);
+            this.drawSlopes(thisset, lastset, lastmax, sg.rowh, sg.gutterw, sg.lineColor, sg.strokew);
           }
         }
       }
