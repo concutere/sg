@@ -1,31 +1,85 @@
+//todo not used yet ...
 function SGData(id, set, val) {
   this.id = id;
   this.set = set;
   this.val = val;
 }
 
-/* data should be of the form 
 
-  [ { id : string, set : number, val : number } ]
-  
-*/
 function SG() {
-  var create = function(data, svgEl) {
+/***
+ SG constructor params, all passed on to create
+  var sg = new SG(data, svgEl, settings, setLabels)
+
+  data: should be of the form 
+    data = [ { 'id' : string,   //name for data row. used to find pairs to connect with slopelines
+                'set' : number, //the linear-ranged value to associate columns (ie year). 
+                                //TODO add setLabels option to params
+                'val' : number 
+              } ]
+    
+  svgEl: where to draw. the height & weight will be changed via style. don't set any viewBox on the element unless you want to clip it!
+    //TODO dynamically generate this?
+  
+  settings: name/value pairs of text/line element & related attributes. 
+            listed below with default values. 
+            make sure values denoted as number are always numeric!
+            todo parse element directives in names like 'line:stroke'? or 'id:width' (where 'id' may represent any SGData attribute or select drawing elements like line & slope)?
+
+      settings = {
+        'fontSize'   : 14,                        
+        'fontFamily' : 'Cabin, Helvetica, Arial', /*if you use webfonts you need to wait for them to download 
+                                                    before building the graph or the text column adjustments 
+                                                    will be off. setting a close-in-size fallback in fontFamily
+                                                    can sometimes serve as an acceptable workaround
+                                                  /*
+        'fontColor'  : 'darkslategray',
+        'textWidth'  : 100,                       //currently serves as a min-width
+                                                  //todo make fixed width or drop the param?
+        'gutterWidth': 6,
+        'slopeWidth' : 100,                      //the width of the slopeline columns
+        'lineSize'   : 1,                      //the thickness of the slopelines, 
+        'lineColor'  : 'lightslategray'
+      }
+***/
+  var create = function(data, svgEl, settings) {
     this.data = data;
     this.el = svgEl;
-    //todo parameterize these
-    this.height = 500;
-    this.rowh = 20; //todo make relative to font size / text element height
-    this.textw = 200;
-    this.slopew = 100;
-    this.gutterw = 5;
-    this.font = 'Cabin, Arial, Helvetica'; 
-    this.fontSize = 14;
-    this.fontColor = 'darkslategray';
-    this.strokew = 0.5;
-    this.lineColor = 'lightslategray';
-    
-    /* this.sets should have sub-arrays grouped by set, like so
+    setSettings(this, settings);
+    init(this);
+    //clear anything that might get in the way
+    //layer another element w/ opaque background if you need to preserve
+    if(svgEl != undefined) {
+      while (svgEl.lastChild) {
+        svgEl.removeChild(svgEl.lastChild);
+      }
+      this.graph(this);
+    }
+   
+    return this;
+
+    function setSettings(sg, settings) {
+      if (settings==undefined || settings.length < 1) {
+        settings = defaultSettings();
+      }
+      //todo move non-calc'd items to CSS?
+      sg.fontSize = parseInt(isNaN(settings.fontSize)   ? 14 : settings.fontSize);
+      sg.rowh = sg.fontSize + 5; // is this fudge good enough?
+      sg.textw = parseInt(isNaN(settings.textWidth)     ? 200 : settings.textWidth);
+      sg.slopew = parseInt(isNaN(settings.slopeWidth)   ? 100 : settings.slopeWidth);
+      sg.gutterw = parseInt(isNaN(settings.gutterWidth) ? 12 : settings.gutterWidth);
+      sg.font = isEmpty(settings.fontFamily)            ? 'Cabin, Arial, Helvetica' : settings.fontFamily; 
+      sg.fontColor = isEmpty(settings.fontColor)        ? 'darkslategray' : settings.fontFamily;
+      sg.strokew = parseFloat(isNaN(settings.lineSize)  ? 1 : settings.lineSize);
+      sg.lineColor = isEmpty(settings.lineColor)        ? 'lightslategray' : settings.lineColor;
+      
+      sg.maxTextWidth = parseInt(isNaN(settings.maxTextWidth) ? 0 : settings.maxTextWidth); // 0 (or any < 1) defaults to no max
+    }
+  }
+  
+  // set up sorted data, check bounds ...
+  function init(sg) {
+      /* this.sets should have sub-arrays grouped by set, like so
        not being used yet, but useful for data-binding by column
       [ // sets
         [ //set
@@ -38,23 +92,11 @@ function SG() {
     */
     // this.sorted is sorted by set, then val, then id
     this.sorted = [];
-  
+
     this.msort = []; 
     this.minv;
     this.maxv;
-    init(this);
-    if(svgEl != undefined) {
-      while (svgEl.lastChild) {
-        svgEl.removeChild(svgEl.lastChild);
-      }
-      this.graph(this);
-    }
-   
-    return this;
-  }
 
-  // set up sorted data, check bounds ...
-  function init(sg) {
     // msort is an all in one big val-sorted list (for bounds checking)
     sg.msort = sg.data.sort(//SGData.prototype.sortVal
               function(self, other) {
@@ -62,7 +104,14 @@ function SG() {
               });
     sg.maxh = sg.msort[sg.msort.length-1].val;
     sg.minh = sg.msort[0].val;
-    sg.mind = 1;  // todo loop through and calc this properly!!!
+    for (var i = 1; i < sg.msort.length; i++) {
+      if (isNaN(sg.mind) || (sg.msort[i].val != sg.msort[i-1].val && sg.msort[i].val - sg.msort[i-1].val < sg.mind)) {
+        sg.mind = sg.msort[i].val - sg.msort[i-1].val;
+      }
+    }
+    if(isNaN(sg.mind)) {
+      sg.mind = 1;
+    }
     sg.scope = sg.maxh - sg.minh; //effective linear range size
     sg.scale = sg.scope / sg.mind; // max rows we can effectively fit
     sg.sorted = sg.msort.sort(//SGData.prototype.sortSet
@@ -87,8 +136,15 @@ function SG() {
                         return self.set - other.set;
                       }
                     });
-    
     return sg;
+  }
+  
+  SG.prototype.waitToLoad = function(waitOnMe, handler) {
+    if (!(waitOnMe || handler)) return;
+    if (typeof waitOnMe === 'String') waitOnMe = document.getDocumentById(waitOnMe);
+    if (waitOnMe) {
+      waitOnMe.onload = handler;
+    }
   }
  
   SG.prototype.graph = function(sg) {
@@ -133,27 +189,32 @@ function SG() {
       at(el, 'text-length', sg.textw);
       at(el, 'font-family', sg.font);
       at(el, 'font-size', sg.fontSize);
-      at(el, 'fill', sg.fontColor);            /*
+      at(el, 'fill', sg.fontColor);            
+      /*
       should the following conditional block be moved
       to a pre-render loop to minimize draw lag 
       for older browsers with slow getBBox??
       */
-      if (el.textContent.length > 0)
+      if (el.textContent.length > 0) {
         el.textContent = el.textContent + ', ' + d.id;
-      else
+      } else {
         el.textContent = '(' + d.val + ') ' + d.id;
+      }
       
       this.el.appendChild(el);
       var tw = el.getComputedTextLength();
-      if (maxtw < tw) maxtw = tw;
+      if (maxtw < tw) {
+        maxtw = tw;
+      }
         
       thisset.push({'id':d.id, 'x':x, 'y':y});
       
-      if (s == sg.sorted.length - 1 || sg.sorted[s+1].set != set)
-        if(lastset.length > 0)
+      if (s == sg.sorted.length - 1 || sg.sorted[s+1].set != set) {
+        if(lastset.length > 0) {
           this.drawSlopes(thisset, lastset, lastmax, sg.rowh, sg.gutterw, sg.lineColor, sg.strokew);
-
-    }
+          }
+        }
+      }
     
     /* todo resize based on contents? scale to fit? 
        dynamically create from params?
@@ -198,6 +259,23 @@ function SG() {
   function at(parent, name, value) {
     parent.setAttribute(name, value);
     return parent;
+  }
+  
+  function defaultSettings() {
+    return {
+          'fontSize'   : '14',                        
+          'fontFamily' : 'Cabin, Helvetica, Arial, sans-serif',
+          'fontColor'  : 'darkslategray',
+          'textWidth'  : '100',                     
+          'gutterWidth': '6',
+          'slopeWidth' : '100',                     
+          'lineSize'   : '0.5',                     
+          'lineColor'  : 'lightslategray'
+    };
+  }
+  
+  function isEmpty(text) {
+    return text == undefined || text.toString().length <  1;
   }
   
   if (arguments.length > 1) {

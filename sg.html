@@ -1,38 +1,52 @@
 <html>
   <head>
-    <link href='http://fonts.googleapis.com/css?family=Cabin:500' rel='stylesheet' type='text/css'>
+    <link id="wflink" href='http://fonts.googleapis.com/css?family=Cabin:400' rel='stylesheet' type='text/css'>
     <style>
+      
     </style>
     <script type="text/javascript" src="sg.js">
     </script>
     <script>
       //todo use json file for test data
-      var data = [{'id':'andromeda', 'set':1, 'val':5},
-                  {'id':'didjeridoo', 'set':1, 'val':5},
-                  {'id':'didjeridoo', 'set':2, 'val':5},
-                  {'id':'brontosaurus', 'set':1, 'val':5},
-                  {'id':'brontosaurus', 'set':2, 'val':5},
-                  {'id':'andromeda', 'set':2, 'val':1},
-                  {'id':'chaparral', 'set':1, 'val':3},
-                  {'id':'didjeridoo', 'set':3, 'val':1},
-                  {'id':'brontosaurus', 'set':3, 'val':3},
-                  {'id':'andromeda', 'set':3, 'val':3},
-                  {'id':'chaparral', 'set':3, 'val':3},
-                  {'id':'chaparral', 'set':2, 'val':3},
-                  {'id':'blue', 'set': 5, 'val':3},
-                  {'id':'moo!!!', 'set':5, 'val':3},
-                  {'id':'moo!!!', 'set':183, 'val':11},
-                  {'id':'blue', 'set':3, 'val':-11}];
+      var data = [{'id':'andromeda', 'set':1989, 'val':5},
+                  {'id':'didjeridoo', 'set':1989, 'val':5},
+                  {'id':'didjeridoo', 'set':1990, 'val':5},
+                  {'id':'brontosaurus', 'set':1989, 'val':5},
+                  {'id':'brontosaurus', 'set':1990, 'val':5},
+                  {'id':'andromeda', 'set':1990, 'val':1},
+                  {'id':'chaparral', 'set':1989, 'val':13},
+                  {'id':'didjeridoo', 'set':1991, 'val':1},
+                  {'id':'brontosaurus', 'set':1991, 'val':13},
+                  {'id':'andromeda', 'set':1991, 'val':10},
+                  {'id':'chaparral', 'set':1991, 'val':10},
+                  {'id':'chaparral', 'set':1990, 'val':13},
+                  {'id':'blue', 'set':1993, 'val':13},
+                  {'id':'moo!!!', 'set':1993, 'val':13},
+                  {'id':'moo!!!', 'set':2012, 'val':13},
+                  {'id':'blue', 'set':1991, 'val':-83}];
     </script>
   </head>
   <body style="background-color:#eee">
     <h1 style="font-family:Cabin; text-align:center">Just a test ...</h1>
       <svg id=sg></svg>
     <script>
-      //todo better way of pausing while web fonts download ...
+      /***
+          beware FOUT when using webfonts
+          FOUT: flash of unstyled text
+          you can use timeouts, fade in transitions, or
+          see ie http://help.typekit.com/customer/portal/articles/6852
+      ***/
       window.setTimeout(function() {
-          var sg = new SG(data, document.getElementById('sg'));
-      }, 222);
+        var sg = new SG(data, document.getElementById('sg'), 
+          { 'fontSize':14, 
+            'fontFamily':'Cabin,Helvetica,Arial,sans-serif',
+            'slopeWidth':75, 
+            'gutterWidth':5,
+            'lineSize':'1', 
+            'lineColor':'lightgray', 
+            'fontColor':'gray'
+          });
+      }, 250);
     </script>
     </body>
 </html>
