@@ -138,15 +138,7 @@ function SG() {
                     });
     return sg;
   }
-  
-  SG.prototype.waitToLoad = function(waitOnMe, handler) {
-    if (!(waitOnMe || handler)) return;
-    if (typeof waitOnMe === 'String') waitOnMe = document.getDocumentById(waitOnMe);
-    if (waitOnMe) {
-      waitOnMe.onload = handler;
-    }
-  }
- 
+
   SG.prototype.graph = function(sg) {
     var x = 5;
     var y = sg.rowh + sg.rowh*2; // padding + headers
