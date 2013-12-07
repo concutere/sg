@@ -73,8 +73,12 @@ function SG() {
       sg.textw = parseInt(isNaN(settings.textWidth)     ? 200 : settings.textWidth);
       sg.slopew = parseInt(isNaN(settings.slopeWidth)   ? 100 : settings.slopeWidth);
       sg.gutterw = parseInt(isNaN(settings.gutterWidth) ? 12 : settings.gutterWidth);
+      sg.resize =  settings.resize === true || settings.resize == 'true' || settings.resize == 'resize';
       if (!isEmpty(settings.waitFont)) {
-        sg.waitFont = settings.waitFont; //no default, don't always want to wait to draw
+        sg.waitFont = settings.waitFont; /***
+                                           no default, but "yourWebFont, 'Courier New'" usually works well 
+                                           if you have smart defaults in the main fontFamily setting
+                                         ***/
       }
 
       sg.fontSize = parseInt(isNaN(settings.fontSize)   ? 14 : settings.fontSize);
@@ -89,7 +93,7 @@ function SG() {
     }
 
     /*** using waitFont setting
-      ie graphWtihFonts("Cabin, Helvetica, Arial", "Cabin, 'Courier New'") 
+      ie graphWithFonts("Cabin, Helvetica, Arial", "Cabin, 'Courier New'") 
       even though Cabin doesn't produce exactly the same text size
       its close enough to Cabin and far enough from Courier New
     ***/
@@ -262,20 +266,27 @@ function SG() {
         }
       }
     
-    /* todo resize based on contents? scale to fit? 
-       dynamically create from params?
-    */
+    if (sg.resize) {
+      resizeEl(sg);
+    }
+  }
+
+  /***
+      Firefox won't force container height to grow to accommodate new svg el height
+      when declaring <!DOCTYPE html>
+      so make sure you specify correctly or provide adequate space via other styling!
+  ***/
+  function resizeEl(sg) {
     var el = sg.el;
     var bb = sg.el.getBBox();
     var sx = bb.width + bb.x;
     var sy = bb.height + bb.y;
     if(isNaN(el.style.height) || el.style.height <= sy) {
-      el.style.height = sy + 5;
+      el.style.height = (sy + 5) + "px";
     }
-    if(isNaN(el.style.height) || el.style.width <= sx) {
-      el.style.width = sx + 5;
+    if(isNaN(el.style.width) || el.style.width <= sx) {
+      el.style.width = (sx + 5) + "px";
     }
-    //*/    
   }
   
   SG.prototype.drawSlopes = function(curr, last, width, height, gutter, color, strokeWidth) {
