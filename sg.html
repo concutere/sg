@@ -33,10 +33,10 @@
       /***
           beware FOUT when using webfonts
           FOUT: flash of unstyled text
-          you can use timeouts, fade in transitions, or
-          see ie http://help.typekit.com/customer/portal/articles/6852
+          you can use a waitFont setting, a font-family value intended to passthru 
+          to a different sized font (compared to passthru fonts for fontFamily) until the webfont is downloaded
+          alternately try something like http://help.typekit.com/customer/portal/articles/6852
       ***/
-      window.setTimeout(function() {
         var sg = new SG(data, document.getElementById('sg'), 
           { 'fontSize':14, 
             'fontFamily':'Cabin,Helvetica,Arial,sans-serif',
@@ -44,9 +44,10 @@
             'gutterWidth':6,
             'lineSize':'1', 
             'lineColor':'lightgray', 
-            'fontColor':'gray'
+            'fontColor':'gray',
+            'waitFont':'Cabin,"Courier New"'
           });
-      }, 250);
+      //}, 250);
     </script>
     </body>
 </html>

@@ -38,10 +38,11 @@ function SG() {
                                                   //todo make fixed width or drop the param?
         'gutterWidth': 6,
         'slopeWidth' : 100,                      //the width of the slopeline columns
-        'lineSize'   : 1,                      //the thickness of the slopelines, 
+        'lineSize'   : 1,                        //the thickness of the slopelines, 
         'lineColor'  : 'lightslategray'
       }
 ***/
+  //todo set up SG as a utility object and expose create other ways
   var create = function(data, svgEl, settings) {
     this.data = data;
     this.el = svgEl;
@@ -53,7 +54,13 @@ function SG() {
       while (svgEl.lastChild) {
         svgEl.removeChild(svgEl.lastChild);
       }
-      this.graph(this);
+      
+      if (this.waitFont) {
+        graphWithFonts.call(this, this.font, this.waitFont);
+      }
+      else {
+        this.graph(this);
+      }
     }
    
     return this;
@@ -63,11 +70,16 @@ function SG() {
         settings = defaultSettings();
       }
       //todo move non-calc'd items to CSS?
-      sg.fontSize = parseInt(isNaN(settings.fontSize)   ? 14 : settings.fontSize);
-      sg.rowh = sg.fontSize + 5; // is this fudge good enough?
       sg.textw = parseInt(isNaN(settings.textWidth)     ? 200 : settings.textWidth);
       sg.slopew = parseInt(isNaN(settings.slopeWidth)   ? 100 : settings.slopeWidth);
       sg.gutterw = parseInt(isNaN(settings.gutterWidth) ? 12 : settings.gutterWidth);
+      if (!isEmpty(settings.waitFont)) {
+        sg.waitFont = settings.waitFont; //no default, don't always want to wait to draw
+      }
+
+      sg.fontSize = parseInt(isNaN(settings.fontSize)   ? 14 : settings.fontSize);
+      sg.rowh = sg.fontSize + 5; // is this fudge good enough?
+	  
       sg.font = isEmpty(settings.fontFamily)            ? 'Cabin, Arial, Helvetica' : settings.fontFamily; 
       sg.fontColor = isEmpty(settings.fontColor)        ? 'darkslategray' : settings.fontFamily;
       sg.strokew = parseFloat(isNaN(settings.lineSize)  ? 1 : settings.lineSize);
@@ -75,38 +87,62 @@ function SG() {
       
       sg.maxTextWidth = parseInt(isNaN(settings.maxTextWidth) ? 0 : settings.maxTextWidth); // 0 (or any < 1) defaults to no max
     }
+
+    /*** using waitFont setting
+      ie graphWtihFonts("Cabin, Helvetica, Arial", "Cabin, 'Courier New'") 
+      even though Cabin doesn't produce exactly the same text size
+      its close enough to Cabin and far enough from Courier New
+    ***/
+    function graphWithFonts(main, wait, txt) {
+      var az = isEmpty(txt) ? 'abcdefghijklmnopqrstuvwxyz' : txt;
+      var fonts = [main, wait];
+      var self = this;
+      inGraphWithFonts();
+      function inGraphWithFonts() {
+        var vals = [];
+        for (var i = 0; i < fonts.length; i++) {
+          var font = fonts[i];
+          var el = sub(svgEl, 'text');
+          at(el, 'font-family', font);
+          at(el, 'font-size',   12);
+
+          el.textContent = az;
+          vals.push(el.getComputedTextLength());
+          //console.log(font + ': ' + vals[vals.length-1]);
+          svgEl.removeChild(el);
+        }
+        if (vals[0] != vals[1]) {
+          window.setTimeout(inGraphWithFonts, 11);
+        }
+        else {
+          self.graph(self);
+        }
+      }
+    }
   }
   
+
   // set up sorted data, check bounds ...
   function init(sg) {
-      /* this.sets should have sub-arrays grouped by set, like so
-       not being used yet, but useful for data-binding by column
-      [ // sets
-        [ //set
-          { //SGData
-            ...
-          }, ...
-        ], ...
-      ]
-      
-    */
-    // this.sorted is sorted by set, then val, then id
-    this.sorted = [];
-
-    this.msort = []; 
-    this.minv;
-    this.maxv;
-
     // msort is an all in one big val-sorted list (for bounds checking)
-    sg.msort = sg.data.sort(//SGData.prototype.sortVal
+    sg.msort = sg.data.sort(
               function(self, other) {
                 return self.val - other.val;
               });
     sg.maxh = sg.msort[sg.msort.length-1].val;
     sg.minh = sg.msort[0].val;
+    //sg.sets = [];
+    sg.setc = 0;
     for (var i = 1; i < sg.msort.length; i++) {
+      //find the minimum delta between vals
       if (isNaN(sg.mind) || (sg.msort[i].val != sg.msort[i-1].val && sg.msort[i].val - sg.msort[i-1].val < sg.mind)) {
         sg.mind = sg.msort[i].val - sg.msort[i-1].val;
+      }
+      if (sg.msort[i-1].set != sg.msort[i].set) {
+        sg.setc++;
+        if(i == sg.msort.length - 1) {
+          sg.setc++;
+        }
       }
     }
     if(isNaN(sg.mind)) {
@@ -114,7 +150,9 @@ function SG() {
     }
     sg.scope = sg.maxh - sg.minh; //effective linear range size
     sg.scale = sg.scope / sg.mind; // max rows we can effectively fit
-    sg.sorted = sg.msort.sort(//SGData.prototype.sortSet
+
+    // sorted is sorted by set, then val, then id
+    sg.sorted = sg.msort.sort(
                     function(self, other) {
                       if (self.set == other.set) {
                         if(self.val == other.val) {
@@ -152,6 +190,7 @@ function SG() {
     var maxtw = 0; //sg.textw;
     var lastmax = sg.textw;
     var longest;
+    var setcnt = 0;
     for (var s = 0; s < sg.sorted.length; s++) {
       var d = sg.sorted[s];
       if (isNaN(set) || d.set > set) {
@@ -174,14 +213,15 @@ function SG() {
         y += sg.rowh * ((isNaN(lastval) ? sg.maxh : lastval) - d.val) / sg.mind; // todo precalc row heights for data objects
         lastval = d.val;
         el = sub(g, 'text');
+        at(el, 'id', s);
+        at(el,'x',x);
+        at(el, 'y',y);
+        //at(el, 'text-length', sg.textw);
+        at(el, 'font-family', sg.font);
+        at(el, 'font-size', sg.fontSize);
+        at(el, 'fill', sg.fontColor);
       }
-      at(el, 'id', s);
-      at(el,'x',x);
-      at(el, 'y',y);
-      //at(el, 'text-length', sg.textw);
-      at(el, 'font-family', sg.font);
-      at(el, 'font-size', sg.fontSize);
-      at(el, 'fill', sg.fontColor);            
+         
       /*
       should the following conditional block be moved
       to a pre-render loop to minimize draw lag 
@@ -199,9 +239,13 @@ function SG() {
         maxtw = tw;
       }
         
-      thisset.push({'id':d.id, 'x':x, 'y':y});
+      thisset.push({'id':d.id, 'set':d.set, 'val':d.val, 'x':x, 'y':y});
       
       if (s == sg.sorted.length - 1 || sg.sorted[s+1].set != set) {
+        setcnt++;
+        var maxTextWidth = 200;
+        //setEl: set(column) header text
+        //todo accept setLabels as SG params
         var setEl = sub(g, 'text');
         at(setEl, 'id', 'set'+set);
         at(setEl, 'y', sg.rowh);
@@ -210,6 +254,7 @@ function SG() {
         at(setEl, 'fill', sg.fontColor);
         setEl.textContent = set;
         at(setEl, 'x', x + (maxtw / 2 - setEl.getComputedTextLength() / 2));
+        
         //todo pass on thisset to right/center align text?
         if(lastset.length > 0) {
             this.drawSlopes(thisset, lastset, lastmax, sg.rowh, sg.gutterw, sg.lineColor, sg.strokew);
