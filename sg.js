@@ -93,6 +93,7 @@ function SG() {
       sg.maxHeight = parseInt(isNaN(settings.maxHeight)       ? 480 : settings.maxHeight);
       sg.lineOpacity = parseFloat(isNaN(settings.lineOpacity) ? 1 : settings.lineOpacity);
       sg.sortVals = isEmpty(settings.sortVals)                ? 'up' : settings.sortVals; // for vals, also: 'down', 'flat'
+      if(!isEmpty(settings.rowCurve)) sg.rowCurve = settings.rowCurve;
     }
 
     /*** using waitFont setting
@@ -251,10 +252,14 @@ function SG() {
           y += sg.rowh;
         }
         else {
-          //todo doesn't handle ranges that cross 0 bound well
-          //buggy for offsetting row height between narrow diff rows while still showing some scale on larger diffs
+          /*todo doesn't handle ranges that cross 0 bound well
+          
+          buggy for offsetting row height between narrow diff rows while still showing some scale on larger diffs
           //just use a maxHeight = 1 to bypass this for now
-          var tmprow = sg.rowh * Math.abs((isNaN(lastval) ? (sg.sortVals == 'up' ? sg.minh : sg.maxh) : lastval) - d.val) / sg.mind; // todo precalc row heights for data objects;
+          */
+          var tmprow = (Math.abs((isNaN(lastval) ? (sg.sortVals == 'up' ? sg.minh : sg.maxh) : lastval) - d.val) / sg.mind); // todo precalc row heights for data objects;
+          if (sg.rowCurve == 'log') tmprow = Math.log(tmprow);
+          tmprow *= sg.rowh;
           if (tmprow < sg.rowh)
             tmprow = sg.rowh;
           y += tmprow;
