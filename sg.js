@@ -105,6 +105,7 @@ function SG() {
       var az = isEmpty(txt) ? 'abcdefghijklmnopqrstuvwxyz' : txt;
       var fonts = [main, wait];
       var self = this;
+      var cnt = 0;
       inGraphWithFonts();
       function inGraphWithFonts() {
         var vals = [];
@@ -119,7 +120,7 @@ function SG() {
 
           svgEl.removeChild(el);
         }
-        if (vals[0] != vals[1]) {
+        if (++cnt < 50 && vals[0] != vals[1]) {
           window.setTimeout(inGraphWithFonts, 11);
         }
         else {
@@ -305,23 +306,21 @@ function SG() {
       if (setcnt == 0) at(el, 'x', right(tw, maxtw, x)); //todo this probably needs a repass to catch late cases of maxtw > maxTextWidth
       else if (setcnt < sg.setc - 1 && s < sg.sorted.length - 1) at(el, 'x', center(tw, maxtw, x));  //else at(el,'x', x);
        
-      thisset.push({'id':d.id, 'set':d.set, 'val':d.val, 'x':x, 'y':y});
+      thisset.push({'id':d.id, 'set':d.set, 'val':d.val, 'x':x, 'y':y, 'tw':tw});
 
       if (s == sg.sorted.length - 1 || sg.sorted[s+1].set != set) {
         setcnt++;
         var maxTextWidth = sg.maxTextWidth;
         //setEl: set(column) header text
         //todo accept setLabels as SG params
-        if (setcnt == 1) {
-          var setEl = sub(g, 'text');
-          at(setEl, 'id', 'set'+set);
-          at(setEl, 'y', sg.rowh);
-          at(setEl, 'font-family', sg.font);
-          at(setEl, 'font-size', sg.fontSize+2);
-          at(setEl, 'fill', sg.fontColor);
-          setEl.textContent = set;
-          at(setEl, 'x', center(setEl.getComputedTextLength(), maxtw, x));
-        }
+        var setEl = sub(g, 'text');
+        at(setEl, 'id', 'set'+set);
+        at(setEl, 'y', sg.rowh);
+        at(setEl, 'font-family', sg.font);
+        at(setEl, 'font-size', sg.fontSize+2);
+        at(setEl, 'fill', sg.fontColor);
+        setEl.textContent = set;
+        at(setEl, 'x', center(setEl.getComputedTextLength(), maxtw, x));
         //todo pass on thisset to right/center align text?
         if(lastset.length > 0) {
             this.drawSlopes(thisset, lastset, lastmax, sg.rowh, sg.gutterw, sg.lineColor, sg.strokew);
