@@ -21,10 +21,11 @@
                   {'id':'andromeda', 'set':1991, 'val':10},
                   {'id':'chaparral', 'set':1991, 'val':10},
                   {'id':'chaparral', 'set':1990, 'val':13},
-                  {'id':'blue', 'set':1993, 'val':13},
-                  {'id':'moo!!!', 'set':1993, 'val':13},
-                  {'id':'moo!!!', 'set':2012, 'val':13},
-                  {'id':'blue', 'set':1991, 'val':83}];
+                  {'id':'blue', 'set':1991, 'val':13},
+                  {'id':'blue', 'set':2012, 'val':13},
+                  {'id':'didjeridoo', 'set':1993, 'val':33},
+                  {'id':'didjeridoo', 'set':2012, 'val':13},
+                  {'id':'blue', 'set':1993, 'val':-83}];
                   
       var gdp =[{"id":"Andorra","set":1970,"val":78617570.32},
                 {"id":"Afghanistan","set":1970,"val":1748886596.27},
@@ -357,7 +358,9 @@
             'waitFont':'Cabin,"Courier New"',
             'resize':true,
             'maxHeight':200,
-            'sortVals':'down'
+            'maxTextWidth':0,
+            'sortVals':'up',
+            //'rowCurve':'log'
           });
     </script>
     
@@ -366,16 +369,16 @@
         var sg = new SG(gdp, document.getElementById('gdp'), 
           { 'fontSize':14, 
             'fontFamily':'Cabin,Helvetica,Arial,sans-serif',
-            'slopeWidth':75, 
+            'slopeWidth':150, 
             'gutterWidth':6,
             'lineSize':1, 
-            'lineOpacity':0.4,
-            'lineColor':'gray', 
-            'fontColor':'gray',
+            'lineOpacity':0.2,
+            'lineColor':'darkslategray', 
+            'fontColor':'darkslategray',
             'waitFont':'Cabin,"Courier New"',
             'resize':true,
             'maxHeight':2550,
-            'sortVals':'up',
+            'sortVals':'down',
             'rowCurve':'log'
           });
     </script>

@@ -196,7 +196,7 @@ function SG() {
         }
       }
     }
-
+//todo valheights array to fit to scale & height bounds w/o fudge
     sg.maxr = sg.maxHeight / sg.rowh;
     if (sg.maxr < sg.msort.length / sg.setc) {
       sg.forceRowY = true;
@@ -244,7 +244,7 @@ function SG() {
         lastset = thisset;
         thisset = [];
         lastmax = maxtw;
-        maxtw = 0;
+        maxtw = sg.maxTextWidth;
         g = sub(this.el, 'g');
       }
       if (isNaN(lastval) || lastval != d.val) {
@@ -267,8 +267,8 @@ function SG() {
         lastval = d.val;
         el = sub(g, 'text');
         at(el, 'id', s);
-        at(el,'x',x);
         at(el, 'y',y);
+        at(el, 'x', x);
         //at(el, 'text-length', sg.textw);
         at(el, 'font-family', sg.font);
         at(el, 'font-size', sg.fontSize);
@@ -280,34 +280,48 @@ function SG() {
       to a pre-render loop to minimize draw lag 
       for older browsers with slow getBBox??
       */
-      if (el.textContent.length > 0) {
-        el.textContent = el.textContent + ', ' + d.id;
-      } else {
-        el.textContent = '(' + d.val + ') ' + d.id;
+      //todo draw vals in their own text element
+      if (setcnt == 0) {
+        var valTxt = ' (' + d.val + ')';
+        if (el.textContent.length > 0) {
+          el.textContent = el.textContent.replace(valTxt, '') + ', ' + d.id + valTxt;
+        } else {
+          el.textContent = d.id + valTxt;
+        }
       }
-      
+      else if (setcnt == sg.setc - 1 || s == sg.sorted.length - 1) {
+        if (el.textContent.length > 0) {
+          el.textContent = el.textContent + ', ' + d.id;
+        } else {
+          el.textContent = '(' + d.val + ') ' + d.id;
+        }
+      }
+      else el.textContent = d.val;
       this.el.appendChild(el);
       var tw = el.getComputedTextLength();
       if (maxtw < tw) {
         maxtw = tw;
       }
-        
+      if (setcnt == 0) at(el, 'x', right(tw, maxtw, x)); //todo this probably needs a repass to catch late cases of maxtw > maxTextWidth
+      else if (setcnt < sg.setc - 1 && s < sg.sorted.length - 1) at(el, 'x', center(tw, maxtw, x));  //else at(el,'x', x);
+       
       thisset.push({'id':d.id, 'set':d.set, 'val':d.val, 'x':x, 'y':y});
-      
+
       if (s == sg.sorted.length - 1 || sg.sorted[s+1].set != set) {
         setcnt++;
-        var maxTextWidth = 200;
+        var maxTextWidth = sg.maxTextWidth;
         //setEl: set(column) header text
         //todo accept setLabels as SG params
-        var setEl = sub(g, 'text');
-        at(setEl, 'id', 'set'+set);
-        at(setEl, 'y', sg.rowh);
-        at(setEl, 'font-family', sg.font);
-        at(setEl, 'font-size', sg.fontSize+2);
-        at(setEl, 'fill', sg.fontColor);
-        setEl.textContent = set;
-        at(setEl, 'x', x + (maxtw / 2 - setEl.getComputedTextLength() / 2));
-        
+        if (setcnt == 1) {
+          var setEl = sub(g, 'text');
+          at(setEl, 'id', 'set'+set);
+          at(setEl, 'y', sg.rowh);
+          at(setEl, 'font-family', sg.font);
+          at(setEl, 'font-size', sg.fontSize+2);
+          at(setEl, 'fill', sg.fontColor);
+          setEl.textContent = set;
+          at(setEl, 'x', center(setEl.getComputedTextLength(), maxtw, x));
+        }
         //todo pass on thisset to right/center align text?
         if(lastset.length > 0) {
             this.drawSlopes(thisset, lastset, lastmax, sg.rowh, sg.gutterw, sg.lineColor, sg.strokew);
@@ -318,7 +332,18 @@ function SG() {
     if (sg.resize) {
       resizeEl(sg);
     }
+    
+    function center(width, containerWidth, offset) {
+      return offset + containerWidth / 2 - width / 2;
+    }
+    function right(width, containerWidth, offset) {
+      return offset + (containerWidth - width);
+    }
+    function left(width, containerWidth, offset) {
+      return offset;
+    }
   }
+  
 
   /***
       Firefox won't force container height to grow to accommodate new svg el height
