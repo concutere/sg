@@ -2,9 +2,8 @@
 <html>
   <head>
     <link id="wflink" href='http://fonts.googleapis.com/css?family=Cabin:400' rel='stylesheet' type='text/css'>
-    <style>
-      
-    </style>
+    <link href="//fonts.googleapis.com/css?family=Playfair+Display:400italic" rel="stylesheet" type="text/css"><!--,700italic,700,900italic,900-->
+<!--link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic' rel='stylesheet' type='text/css'-->
     <script type="text/javascript" src="sg.js">
     </script>
     <script>
@@ -333,12 +332,38 @@
                 {"id":"Zimbabwe","set":1979,"val":5177459390.95}]
                  
     </script>
+    <style>
+      h1, div {
+        font-family:Playfair Display';
+      }
+      div {
+        font-size:14pt;
+        margin:10px;
+        font-style:italic;
+      }
+      .sub {
+        font-size:12pt;
+        font-style:italic;
+      }
+      .huge {
+        font-size:3em;
+        margin:1em;
+      }
+      .center {
+        width:100%;
+        text-align:center;
+      }
+      svg {
+      }
+    </style>    
   </head>
   <body style=";background-color:#eee">
-    <h1 style="font-family:Cabin; text-align:center">Just a test ...</h1>
-      <svg id="sample" style="background-color:lightyellow"></svg>
-
-    <script>
+    <div class="huge center">Fun with Slopegraphs!</div>
+      <div class="sub">
+        First sample uses contrived data that tests many different features at once
+      </div>
+       <svg id="sample" style="background-color:lightyellow"></svg>
+   <script>
       /***
           beware FOUT when using webfonts
           FOUT: flash of unstyled text
@@ -363,7 +388,12 @@
             //'rowCurve':'log'
           });
     </script>
-    
+    <p>
+    <div class="sub">
+      This example uses GDP data from http://data.worldbank.org/indicator/NY.GDP.MKTP.CD.
+      Currently aligning on dates from ET's sample from his slopegraphs page,
+      excluding aggregate data (for now) as it throws off the scale of differences for individual countries, effectively forcing those rows to be flattened to min height no matter what.
+    </div>
     <svg id="gdp"></svg>
         <script>
         var sg = new SG(gdp, document.getElementById('gdp'), 
@@ -372,7 +402,7 @@
             'slopeWidth':150, 
             'gutterWidth':6,
             'lineSize':1, 
-            'lineOpacity':0.2,
+            'lineOpacity':0.5,
             'lineColor':'darkslategray', 
             'fontColor':'darkslategray',
             'waitFont':'Cabin,"Courier New"',
