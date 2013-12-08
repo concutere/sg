@@ -635,7 +635,7 @@
     </script>
     <style>
       @import url(http://fonts.googleapis.com/css?family=Cabin:500);
-      @import url(http://fonts.googleapis.com/css?family=Vollkorn:400italic);
+      @import url(http://fonts.googleapis.com/css?family=Vollkorn:400,400italic);
       
       h1, div {
         font-family:Vollkorn,serif;
@@ -643,7 +643,7 @@
       div {
         font-size:14pt;
         margin:10px;
-        font-style:italic;
+        //font-style:italic;
       }
       .sub {
         font-size:12pt;
@@ -678,43 +678,44 @@
           to a different sized font (compared to passthru fonts for fontFamily) until the webfont is downloaded
           @import url seems to work better than <link>, at least in chrome
       ***/
-        var sg = new SG(sample, document.getElementById('sample'), 
+        (function() {
+          var sg = new SG(sample, document.getElementById('sample'), 
           { 'fontSize':14, 
             'fontFamily':'Cabin,Helvetica,Arial,sans-serif',
             'slopeWidth':75, 
             'gutterWidth':6,
             'lineSize':1, 
-            'lineOpacity':0.4,
-            'lineColor':'gray', 
-            'fontColor':'gray',
+            'lineOpacity':0.5,
+            'lineColor':'#988', 
+            'fontColor':'#221',
             'waitFont':'Cabin,"Courier New"',
             'resize':true,
-            'maxHeight':200,
-            'maxTextWidth':20, //setting to 0 can throw off alignment of val-only columns
+            'height':200,
+            'textWidth':20, //setting to 0 can throw off alignment of val-only columns
             'sortVals':'up',
-          });
+          });})();
     </script>
     <p>
     <div class="sub">
-      This example uses GDP data from http://data.worldbank.org/indicator/NY.GDP.MKTP.CD.
-      Currently aligning on dates from ET's GDP sample from http://www.edwardtufte.com/bboard/q-and-a-fetch-msg?msg_id=0003nk,
+      This example uses GDP data from <a href="http://data.worldbank.org/indicator/NY.GDP.MKTP.CD">World Bank data</a>.
+      Currently aligning on dates from ET's GDP sample from <a href="http://www.edwardtufte.com/bboard/q-and-a-fetch-msg?msg_id=0003nk">his slopegraphs page</a>,
       excluding aggregate data (for now) as it throws off the scale of differences for individual countries, effectively forcing those rows to be flattened to min height no matter what.
     </div>
     <svg id="gdp"></svg>
         <script>
         var sg = new SG(gdp, document.getElementById('gdp'), 
-          { 'fontSize':14, 
+          { 'fontSize':12, 
             'fontFamily':'Cabin,Helvetica,Arial,sans-serif',
             'slopeWidth':150, 
             'gutterWidth':6,
             'lineSize':1, 
-            'lineOpacity':0.4,
-            'lineColor':'darkslategray', 
-            'fontColor':'darkslategray',
+            'lineOpacity':0.3,
+            'lineColor':'#234', 
+            'fontColor':'#234',
             'waitFont':'Cabin,"Courier New"',
             'resize':true,
-            'maxHeight':3000,
-            'maxTextWidth':275,
+            'height':3000,
+            'textWidth':275,
             'sortVals':'down',
             'rowCurve':'log'
           });
