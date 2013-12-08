@@ -240,7 +240,7 @@ function SG() {
         set = d.set;
         //if (sg.sortVals == 'up') y = sg.maxHeight - sg.rowh;
         //else 
-        y = sg.rowh + sg.rowh*2; 
+        y = sg.rowh + sg.rowh; 
         lastval = undefined;
         lastset = thisset;
         thisset = [];
@@ -298,7 +298,7 @@ function SG() {
         }
       }
       else el.textContent = d.val;
-      this.el.appendChild(el);
+      //this.el.appendChild(el);
       var tw = el.getComputedTextLength();
       if (maxtw < tw) {
         maxtw = tw;
@@ -320,7 +320,8 @@ function SG() {
         at(setEl, 'font-size', sg.fontSize+2);
         at(setEl, 'fill', sg.fontColor);
         setEl.textContent = set;
-        at(setEl, 'x', center(setEl.getComputedTextLength(), maxtw, x));
+        var htw = setEl.getComputedTextLength();
+        at(setEl, 'x', center(htw, maxtw, x));
         //todo pass on thisset to right/center align text?
         if(lastset.length > 0) {
             this.drawSlopes(thisset, lastset, lastmax, sg.rowh, sg.gutterw, sg.lineColor, sg.strokew);
@@ -333,7 +334,7 @@ function SG() {
     }
     
     function center(width, containerWidth, offset) {
-      return offset + containerWidth / 2 - width / 2;
+      return offset + (containerWidth / 2 - width / 2);
     }
     function right(width, containerWidth, offset) {
       return offset + (containerWidth - width);
