@@ -33,11 +33,6 @@
 
     <script>
       /***
-          Firefox doesn't like the way SG resizes svg elements when <!DOCTYPE html> is declared
-          it doesn't default body height to screen height even when the svg element within requires it
-          position:absolute on the svg will work around it ...
-      ***/
-      /***
           beware FOUT when using webfonts
           FOUT: flash of unstyled text
           you can use a waitFont setting, a font-family value intended to passthru 
@@ -55,7 +50,6 @@
             'waitFont':'Cabin,"Courier New"',
             'resize':true
           });
-      //}, 250);
     </script>
     </body>
 </html>

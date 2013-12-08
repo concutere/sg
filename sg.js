@@ -281,12 +281,15 @@ function SG() {
     var bb = sg.el.getBBox();
     var sx = bb.width + bb.x;
     var sy = bb.height + bb.y;
+    
+    //todo better parsing of style attribute px suffix for comparisons
     if(isNaN(el.style.height) || el.style.height <= sy) {
       el.style.height = (sy + 5) + "px";
     }
     if(isNaN(el.style.width) || el.style.width <= sx) {
       el.style.width = (sx + 5) + "px";
     }
+    return 
   }
   
   SG.prototype.drawSlopes = function(curr, last, width, height, gutter, color, strokeWidth) {
