@@ -70,9 +70,9 @@ function SG() {
         settings = defaultSettings();
       }
       //todo move non-calc'd items to CSS?
-      sg.textw = parseInt(isNaN(settings.textWidth)     ? 200 : settings.textWidth);
-      sg.slopew = parseInt(isNaN(settings.slopeWidth)   ? 100 : settings.slopeWidth);
-      sg.gutterw = parseInt(isNaN(settings.gutterWidth) ? 12 : settings.gutterWidth);
+      sg.textw = parseInt(isNaN(settings.textWidth)           ? 200 : settings.textWidth);
+      sg.slopew = parseInt(isNaN(settings.slopeWidth)         ? 100 : settings.slopeWidth);
+      sg.gutterw = parseInt(isNaN(settings.gutterWidth)       ? 12 : settings.gutterWidth);
       sg.resize =  settings.resize === true || settings.resize == 'true' || settings.resize == 'resize';
       if (!isEmpty(settings.waitFont)) {
         sg.waitFont = settings.waitFont; /***
@@ -81,15 +81,18 @@ function SG() {
                                          ***/
       }
 
-      sg.fontSize = parseInt(isNaN(settings.fontSize)   ? 14 : settings.fontSize);
+      sg.fontSize = parseInt(isNaN(settings.fontSize)         ? 14 : settings.fontSize);
       sg.rowh = sg.fontSize + 5; // is this fudge good enough?
 	  
-      sg.font = isEmpty(settings.fontFamily)            ? 'Cabin, Arial, Helvetica' : settings.fontFamily; 
-      sg.fontColor = isEmpty(settings.fontColor)        ? 'darkslategray' : settings.fontFamily;
-      sg.strokew = parseFloat(isNaN(settings.lineSize)  ? 1 : settings.lineSize);
-      sg.lineColor = isEmpty(settings.lineColor)        ? 'lightslategray' : settings.lineColor;
+      sg.font = isEmpty(settings.fontFamily)                  ? 'Cabin, Arial, Helvetica' : settings.fontFamily; 
+      sg.fontColor = isEmpty(settings.fontColor)              ? 'darkslategray' : settings.fontFamily;
+      sg.strokew = parseFloat(isNaN(settings.lineSize)        ? 1 : settings.lineSize);
+      sg.lineColor = isEmpty(settings.lineColor)              ? 'lightslategray' : settings.lineColor;
       
       sg.maxTextWidth = parseInt(isNaN(settings.maxTextWidth) ? 0 : settings.maxTextWidth); // 0 (or any < 1) defaults to no max
+      sg.maxHeight = parseInt(isNaN(settings.maxHeight)       ? 480 : settings.maxHeight);
+      sg.lineOpacity = parseFloat(isNaN(settings.lineOpacity) ? 1 : settings.lineOpacity);
+      sg.sortVals = isEmpty(settings.sortVals)                ? 'up' : settings.sortVals; // for vals, also: 'down', 'flat'
     }
 
     /*** using waitFont setting
@@ -112,7 +115,7 @@ function SG() {
 
           el.textContent = az;
           vals.push(el.getComputedTextLength());
-          //console.log(font + ': ' + vals[vals.length-1]);
+
           svgEl.removeChild(el);
         }
         if (vals[0] != vals[1]) {
@@ -129,29 +132,33 @@ function SG() {
   // set up sorted data, check bounds ...
   function init(sg) {
     // msort is an all in one big val-sorted list (for bounds checking)
-    sg.msort = sg.data.sort(
-              function(self, other) {
+    var valsort =(function() {
+      if (sg.sortVals == 'up') return function(a,b) { return a.val - b.val;};
+      else if (sg.sortVals == 'down') return function(a,b) { return b.val - a.val;};
+      else /*if (sg.sortVals == 'flat')*/ return function(a,b) { return 0;};
+    })();
+    sg.msort = sg.data.sort(valsort);
+              /*function(self, other) {
                 return self.val - other.val;
-              });
-    sg.maxh = sg.msort[sg.msort.length-1].val;
-    sg.minh = sg.msort[0].val;
-    //sg.sets = [];
-    sg.setc = 0;
+              });*/
+    if (sg.sortVals != 'down') {
+      sg.maxh = sg.msort[sg.msort.length-1].val;
+      sg.minh = sg.msort[0].val;
+    }
+    else {
+      sg.minh = sg.msort[sg.msort.length-1].val;
+      sg.maxh = sg.msort[0].val;
+    }
     for (var i = 1; i < sg.msort.length; i++) {
       //find the minimum delta between vals
-      if (isNaN(sg.mind) || (sg.msort[i].val != sg.msort[i-1].val && sg.msort[i].val - sg.msort[i-1].val < sg.mind)) {
-        sg.mind = sg.msort[i].val - sg.msort[i-1].val;
-      }
-      if (sg.msort[i-1].set != sg.msort[i].set) {
-        sg.setc++;
-        if(i == sg.msort.length - 1) {
-          sg.setc++;
-        }
+      if (isNaN(sg.mind) || (sg.msort[i].val != sg.msort[i-1].val && Math.abs(sg.msort[i].val - sg.msort[i-1].val) < sg.mind)) {
+        sg.mind = Math.abs(sg.msort[i].val - sg.msort[i-1].val);
       }
     }
     if(isNaN(sg.mind)) {
       sg.mind = 1;
     }
+    //sg.sets = [];
     sg.scope = sg.maxh - sg.minh; //effective linear range size
     sg.scale = sg.scope / sg.mind; // max rows we can effectively fit
 
@@ -171,13 +178,37 @@ function SG() {
                           }
                         }
                         else {
-                          return self.val - other.val;
+                          return valsort(self, other);
                         }
                       }
                       else {
                         return self.set - other.set;
                       }
                     });
+                    
+    sg.setc = 1;
+    for (var i = 1; i < sg.sorted.length; i++) {
+      if (sg.sorted[i-1].set != sg.sorted[i].set) {
+        sg.setc++;
+        if(i == sg.sorted.length - 1) {
+          sg.setc++;
+        }
+      }
+    }
+
+    sg.maxr = sg.maxHeight / sg.rowh;
+    if (sg.maxr < sg.msort.length / sg.setc) {
+      sg.forceRowY = true;
+      console.log('too many rows to fit in maxHeight (' + sg.maxHeight + ')!');
+      sg.maxHeight = Math.ceil(sg.rowh * sg.msort.length / sg.setc) + sg.rowh * 3; //padding/set headers
+    }
+    else if (sg.maxr < (sg.maxh - sg.minh) / sg.mind) {
+      //data won't fit to scale, need to compress
+      //sg.forceRowY = true;
+      sg.mind = (sg.maxh - sg.minh) / sg.maxr;
+    }
+    
+
     return sg;
   }
 
@@ -213,8 +244,19 @@ function SG() {
         maxtw = 0;
         g = sub(this.el, 'g');
       }
-      if (isNaN(lastval) || lastval < d.val) {
-        y += sg.rowh * ((isNaN(lastval) ? sg.maxh : lastval) - d.val) / sg.mind; // todo precalc row heights for data objects
+      if (isNaN(lastval) || lastval != d.val) {
+        if (sg.forceRowY) {
+          y += sg.rowh;
+        }
+        else {
+          var lasty = y;
+          //todo doesn't handle ranges that cross 0 bound well
+          //probably buggy for changing sort orders as well
+          var tmprow = sg.rowh * ((isNaN(lastval) ? sg.maxh : lastval) - d.val) / sg.mind; // todo precalc row heights for data objects
+          if (tmprow < sg.rowh)
+            tmprow = sg.rowh;
+          y += tmprow;
+        }
         lastval = d.val;
         el = sub(g, 'text');
         at(el, 'id', s);
@@ -305,6 +347,7 @@ function SG() {
           at(line, 'y2', curr[c].y - height/6);
           at(line, 'stroke', color);
           at(line, 'stroke-width', strokeWidth);
+          at(line, 'stroke-opacity',this.lineOpacity);
         }
       }
     }
