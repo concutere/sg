@@ -83,14 +83,15 @@ function SG() {
 
       sg.fontSize = parseInt(isNaN(settings.fontSize)         ? 14 : settings.fontSize);
       sg.rowh = sg.fontSize + 5; // is this fudge good enough?
+      sg.headh = sg.rowh * 2; // todo param
 	  
       sg.font = isEmpty(settings.fontFamily)                  ? 'Cabin, Arial, Helvetica' : settings.fontFamily; 
       sg.fontColor = isEmpty(settings.fontColor)              ? 'darkslategray' : settings.fontColor;
       sg.strokew = parseFloat(isNaN(settings.lineSize)        ? 1 : settings.lineSize);
       sg.lineColor = isEmpty(settings.lineColor)              ? 'lightslategray' : settings.lineColor;
       
-      sg.textWidth = parseInt(isNaN(settings.textWidth) ? 0 : settings.textWidth); // 0 (or any < 1) defaults to no max
-      sg.height = parseInt(isNaN(settings.height)       ? 480 : settings.height);
+      sg.textWidth = parseInt(isNaN(settings.textWidth)       ? 0 : settings.textWidth); // 0 (or any < 1) defaults to no max
+      sg.height = parseInt(isNaN(settings.height)             ? 480 : settings.height);
       sg.lineOpacity = parseFloat(isNaN(settings.lineOpacity) ? 1 : settings.lineOpacity);
       sg.sortVals = isEmpty(settings.sortVals)                ? 'up' : settings.sortVals; // for vals, also: 'down', 'flat'
       if(!isEmpty(settings.rowCurve)) sg.rowCurve = settings.rowCurve;
@@ -111,10 +112,7 @@ function SG() {
         var vals = [];
         for (var i = 0; i < fonts.length; i++) {
           var font = fonts[i];
-          var el = sub(svgEl, 'text');
-          at(el, 'font-family', font);
-          at(el, 'font-size',   12);
-
+          var el = newEl(svgEl, 'text', 'font-family', font, 'font-size',   12);
           el.textContent = az;
           vals.push(el.getComputedTextLength());
 
@@ -133,6 +131,8 @@ function SG() {
 
   // set up sorted data, check bounds ...
   function init(sg) {
+    sg.maxr = (sg.height - sg.rowh * 2)/ sg.rowh;
+
     // msort is an all in one big val-sorted list (for bounds checking)
     var valsort =(function() {
       if (sg.sortVals == 'up') return function(a,b) { return a.val - b.val;};
@@ -140,9 +140,6 @@ function SG() {
       else /*if (sg.sortVals == 'flat')*/ return function(a,b) { return 0;};
     })();
     sg.msort = sg.data.sort(valsort);
-              /*function(self, other) {
-                return self.val - other.val;
-              });*/
     if (sg.sortVals != 'down') {
       sg.maxh = sg.msort[sg.msort.length-1].val;
       sg.minh = sg.msort[0].val;
@@ -153,17 +150,20 @@ function SG() {
     }
     for (var i = 1; i < sg.msort.length; i++) {
       //find the minimum delta between vals
-      if (isNaN(sg.mind) || (sg.msort[i].val != sg.msort[i-1].val && Math.abs(sg.msort[i].val - sg.msort[i-1].val) < sg.mind)) {
-        sg.mind = Math.abs(sg.msort[i].val - sg.msort[i-1].val);
+      var diff = Math.abs(sg.msort[i].val - sg.msort[i-1].val);
+      if (diff != 0 && (isNaN(sg.mind) || diff < sg.mind)) {
+        sg.mind = diff;
+      }
+      if (diff != 0 && (isNaN(sg.maxd) || diff > sg.maxd)) {
+        sg.maxd = diff;
       }
     }
     if(isNaN(sg.mind)) {
       sg.mind = 1;
     }
-    //sg.sets = [];
-    sg.scope = sg.maxh - sg.minh; //effective linear range size
-    sg.scale = sg.scope / sg.mind; // max rows we can effectively fit
-
+    if(isNaN(sg.maxd)) {
+      sg.maxd = 1;
+    }
     // sorted is sorted by set, then val, then id
     sg.sorted = sg.msort.sort(
                     function(self, other) {
@@ -188,36 +188,55 @@ function SG() {
                       }
                     });
                     
-    sg.setc = 1;
+    sg.setc = 1; // # of sets/columns
     sg.sorted[0].s = 1;
+    var unqid = [sg.sorted[0].id]; 
+    var unqval = [sg.sorted[0].val];
+    var unqr = unqidr = 1; // unique rows
+    var dupval = [];
+    var dupr = 0;
     for (var i = 1; i < sg.sorted.length; i++) {
+      if (unqid.indexOf(sg.sorted[i].id) < 0) unqid.push(sg.sorted[i].id);
+      if (unqval.indexOf(sg.sorted[i].val) < 0) unqval.push(sg.sorted[i].val);
       if (sg.sorted[i-1].set != sg.sorted[i].set) {
         sg.setc++;
         if(i == sg.sorted.length - 1) {
           sg.setc++;
         }
       }
-    }
-//todo valheights array to fit to scale & height bounds w/o fudge
-    sg.maxr = sg.height / sg.rowh;
-    if (sg.maxr < sg.msort.length / sg.setc) {
-      sg.forceRowY = true;
-      console.log('too many rows to fit in height (' + sg.height + ')!');
-      sg.height = Math.ceil(sg.rowh * sg.msort.length / sg.setc) + sg.rowh * 3; //padding/set headers
-    }
-    else if (sg.maxr < (sg.maxh - sg.minh) / sg.mind) {
-      //data won't fit to scale, need to compress
-      //sg.forceRowY = true;
-      sg.mind = (sg.maxh - sg.minh) / sg.maxr;
+
     }
     
-
+    unqr = unqidr = unqid.length - 1;
+    
+    if (sg.maxr < unqr) {
+      sg.forceRowY = true;
+      sg.maxr = unqr;
+      sg.height = Math.ceil(sg.rowh * sg.maxr) + sg.rowh * 2; //padding/set headers
+    }
+    else  {
+      //data won't fit to scale, need to compress
+      sg.forced = (sg.maxh - sg.minh) / sg.maxr;
+    }
+    
     return sg;
   }
 
+  //show row lines & units for debugging positioning
+  function drawGrid(el, start, r, h, w, min, d) {
+    for(var i = 1; i < h/r; i++) {
+      var y = start + i * r;
+      newEl(el,'line','x1',0,'x2',w,'y1',y, 'y2', y, 'stroke', '#444','stroke-width','.2');
+      var t = newEl(el,'text','x',0,'y',y, 'fill','#666');
+      t.textContent = parseInt(min + i * d);
+      
+    }
+  }
   SG.prototype.graph = function(sg) {
-    var x = 5;
-    var y = sg.rowh + sg.rowh*2; // padding + headers
+    //drawGrid(sg.el, sg.rowh * 2,sg.rowh, sg.height, 800, sg.minh, sg.forced);
+    var x = 10; //todo param
+    var y = sg.rowh * 2; // padding + headers
+    var oy = y;
     var set;
     var lastval;
     var el;
@@ -225,10 +244,13 @@ function SG() {
     var thisset = [];
     var lastx = 0;
     var g;
-    var maxtw = 0; //sg.textw;
+    var maxtw = 0; 
     var lastmax = sg.textw;
     var longest;
     var setcnt = 0;
+    var dupcnt = 0;
+    var predupy = y;
+    var dupoff = 0;
     for (var s = 0; s < sg.sorted.length; s++) {
       var d = sg.sorted[s];
       if (isNaN(set) || d.set > set) {
@@ -236,12 +258,9 @@ function SG() {
         if(!isNaN(set)) {
           lastx = x;
           x += maxtw + sg.slopew + sg.gutterw * 2;
-          //maxtw = sg.textw;
         }
         set = d.set;
-        //if (sg.sortVals == 'up') y = sg.height - sg.rowh;
-        //else 
-        y = sg.rowh + sg.rowh; 
+        y = sg.rowh * 2; 
         lastval = undefined;
         lastset = thisset;
         thisset = [];
@@ -249,86 +268,93 @@ function SG() {
         maxtw = sg.textWidth;
         g = sub(this.el, 'g');
       }
-      if (isNaN(lastval) || lastval != d.val) {
-        if (sg.forceRowY) {
-          y += sg.rowh;
+
+      if (!isNaN(lastval)) {
+        if (lastval == d.val) {
+          if(dupcnt++ == 0)
+            dupcnt++;
         }
-        else {
-          /*todo doesn't handle ranges that cross 0 bound well
-          
-          buggy for offsetting row height between narrow diff rows while still showing some scale on larger diffs
-          //just use a height = 1 to bypass this for now
-          */
-          var tmprow = (Math.abs((isNaN(lastval) ? (sg.sortVals == 'up' ? sg.minh : sg.maxh) : lastval) - d.val) / sg.mind); // todo precalc row heights for data objects;
-          if (sg.rowCurve == 'log') tmprow = Math.log(tmprow);
-          tmprow *= sg.rowh;
-          if (tmprow < sg.rowh)
-            tmprow = sg.rowh;
-          y += tmprow;
+        else if (dupcnt > 0) {
+          var diff = sg.rowh * (dupcnt-1)/2;          
+          var ydiff = Math.abs(y - predupy);
+
+          if (diff + sg.rowh * dupcnt > ydiff ) {
+            diff = thisset[thisset.length-(dupcnt)].y - predupy - sg.rowh;
+          }
+         if (diff > 0) {
+            for (var i = thisset.length-1; i >= thisset.length-dupcnt; i--) {
+              thisset[i].y -= diff;
+              at(thisset[i].el, 'y', thisset[i].y);
+              dupoff += diff;
+            }
+          }
+          dupcnt = 0;
+          predupy = y;
         }
-        lastval = d.val;
-        el = sub(g, 'text');
-        at(el, 'id', s);
-        at(el, 'y',y);
-        at(el, 'x', x);
-        //at(el, 'text-length', sg.textw);
-        at(el, 'font-family', sg.font);
-        at(el, 'font-size', sg.fontSize);
-        at(el, 'fill', sg.fontColor);
       }
-         
-      /*
-      should the following conditional block be moved
-      to a pre-render loop to minimize draw lag 
-      for older browsers with slow getBBox??
-      */
-      //todo draw vals in their own text element
-      if (setcnt == 0) {
-        var valTxt = ' (' + d.val + ')';
-        if (el.textContent.length > 0) {
-          el.textContent = el.textContent.replace(valTxt, '') + ', ' + d.id + valTxt;
-        } else {
-          el.textContent = d.id + valTxt;
+      else {
+        dupcnt = 0;
+        predupy = y + sg.rowh;
+      }
+      
+      if (sg.forceRowY || dupcnt > 0) {
+        y += sg.rowh;
+      }
+      else {
+        var max = (sg.sortVals == 'up' ? sg.minh : sg.maxh);
+        var val = (isNaN(lastval) ? max : max);
+        var tmprow = (Math.abs(val - d.val) / sg.forced); // todo precalc row heights for data objects;
+        if (sg.rowCurve == 'log') tmprow = Math.log(tmprow);
+        tmprow *= sg.rowh;
+        if (tmprow < sg.rowh) {
+          tmprow = sg.rowh;
         }
+        else if (dupcnt <= 0 && dupoff > 0) {
+          var reduceBy = (dupoff > sg.rowh) ? sg.rowh : dupoff;
+          tmprow -= reduceBy;
+          dupoff -= reduceBy;
+        }
+        y = tmprow + sg.rowh * 2;
+        if (thisset.length > 0 && y < thisset[thisset.length-1].y + sg.rowh)
+          y = thisset[thisset.length-1].y + sg.rowh;
+      }
+
+      lastval = d.val;
+         
+      //todo val & id get their own text el
+      el = newEl(g, 'text', 
+        'id', s, 'y', y, 'x', x,
+         'font-family', sg.font, 'font-size', sg.fontSize, 'fill', sg.fontColor);
+
+      if (setcnt == 0) {
+        // align right, id before val
+        el.textContent = d.id + ' ' + d.val;
       }
       else if (setcnt == sg.setc - 1 || s == sg.sorted.length - 1) {
-        if (el.textContent.length > 0) {
-          el.textContent = el.textContent + ', ' + d.id;
-        } else {
-          el.textContent = '(' + d.val + ') ' + d.id;
-        }
+        //align left, val before id
+          el.textContent = '' + d.val + ' ' + d.id;
       }
-      else el.textContent = d.val;
+      else el.textContent = d.val; 
       var tw = el.getComputedTextLength();
       if (maxtw < tw) {
         maxtw = tw;
       }
-      /*if (setcnt == 0) at(el, 'x', right(tw, maxtw, x)); //todo this probably needs a repass to catch late cases of maxtw > textWidth
-      else if (setcnt < sg.setc - 1 && s < sg.sorted.length - 1) at(el, 'x', center(tw, maxtw, x));  //else at(el,'x', x);
-       */
+
       thisset.push({'id':d.id, 'set':d.set, 'val':d.val, 'x':x, 'y':y, 's':s, 'tw':tw, 'setcnt': setcnt, 'el': el});
  
       if (s == sg.sorted.length - 1 || sg.sorted[s+1].set != set) {
         setcnt++;
-        var textWidth = sg.textWidth;
-        //setEl: set(column) header text
         //todo accept setLabels as SG params
         at(g, 'width', maxtw);
-        var setEl = sub(g, 'text');
-        at(setEl, 'id', 'set'+set);
-        at(setEl, 'y', sg.rowh);
-        at(setEl, 'font-family', sg.font);
-        at(setEl, 'font-size', sg.fontSize+2);
-        at(setEl, 'fill', sg.fontColor);
+        var setEl = newEl(g, 'text',    
+                      'id','set'+set, 'y', sg.rowh, 
+                      'font-family', sg.font,'font-size', sg.fontSize+2, 'fill', sg.fontColor);
         setEl.textContent = set;
         var htw = setEl.getComputedTextLength();
         at(setEl, 'x', center(htw, maxtw, x));
-        //todo pass on thisset to right/center align text?
-        //if(lastset.length > 0) {
-            sg.repassGraph(thisset, lastset, maxtw, lastmax, sg.rowh, sg.gutterw, sg.lineColor, sg.strokew);
-          //}
+        sg.repassGraphSet(thisset, lastset, maxtw, lastmax, sg.rowh, sg.gutterw, sg.lineColor, sg.strokew);
       }
-    }
+    } // end for
   
     if (sg.resize) {
       resizeEl(sg);
@@ -345,6 +371,34 @@ function SG() {
     return offset;
   }
 
+  /***
+    atts should be array (or json?) of strings of css attribute assignments
+    (ie 'font-weight:bold')
+  ***/
+  function newEl(parent, type, atts) { 
+    return newElNS("http://www.w3.org/2000/svg", parent, type, 
+              Array.prototype.slice.call(arguments, 2));
+  }
+  
+  function newElNS(ns, parent, type, atts) {
+    if (isEmpty(type)) return;
+    var el = document.createElementNS(ns,type);
+    parent.appendChild(el);
+    if (atts) 
+      addAtts(el, Object.prototype.toString.call( atts ) === '[object Array]' ?
+                  atts : Array.prototype.slice.call(arguments, 3));
+    
+    return el;
+  }
+  
+  function addAtts(el, atts) {
+    for (var a = 0; a+1 < atts.length; a+=2) {
+      var val = atts[a+1];
+      at(el, atts[a],atts[a+1]);
+    }
+    return el;
+  }
+  
   /***
       Firefox won't force container height to grow to accommodate new svg el height
       when declaring <!DOCTYPE html>
@@ -366,30 +420,22 @@ function SG() {
     return 
   }
   
-  SG.prototype.repassGraph = function(curr, last, maxtw, width, height, gutter, color, strokeWidth) {
-    //var g = sub(svgEl, 'g');
+  SG.prototype.repassGraphSet = function(curr, last, maxtw, width, height, gutter, color, strokeWidth) {
+
     for(var c = 0; c < curr.length; c++) {
       fixTextWidth.call(this,curr[c]);
       if (last && last.length > 0) {
         for(var l = 0; l < last.length; l++) {
           if(curr[c].id == last[l].id) {
-            var line = sub(this.el, 'line');
-            at(line, 'x1', last[l].x + width + gutter);
-            at(line, 'x2', curr[c].x - gutter);
-            at(line, 'y1', last[l].y - height/6); // todo the factor of 6 here feels really arbitrary, may break with widely varying font sizes
-            at(line, 'y2', curr[c].y - height/6);
-            at(line, 'stroke', color);
-            at(line, 'stroke-width', strokeWidth);
-            at(line, 'stroke-opacity',this.lineOpacity);
+            var line = newEl(this.el, 'line', 'x1', last[l].x + width + gutter,
+              'x2', curr[c].x - gutter, 'y1', last[l].y - height/6,  // todo the factor of 6 here feels really arbitrary, may break with widely varying font sizes
+              'y2', curr[c].y - height/6, 'stroke', color, 'stroke-width', strokeWidth, 'stroke-opacity',this.lineOpacity);
           }
         }
       }
     }
     
     function fixTextWidth(d) {
-      /*if (d.setcnt == 0) at(d.el, 'x', right(d.tw, maxtw, d.x)); //todo this probably needs a repass to catch late cases of maxtw > textWidth
-      else if (d.setcnt < sg.setc - 1 && d.s < sg.sorted.length - 1) at(d.el, 'x', center(d.tw, maxtw, d.x));  //else at(el,'x', x);
-*/
       if (d.setcnt != this.setc - 1 && d.s != this.sorted.length - 1) at(d.el, 'x', right(d.tw, maxtw, d.x));
     }
   }
