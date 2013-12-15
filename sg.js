@@ -1,12 +1,3 @@
-//todo not used yet ...
-function SGData(id, set, val) {
-  this.id = id;
-  this.set = set;
-  this.val = val;
-}
-
-
-function SG() {
 /***
  SG constructor params, all passed on to create
   var sg = new SG(data, svgEl, settings, setLabels)
@@ -42,12 +33,13 @@ function SG() {
         'lineColor'  : 'lightslategray'
       }
 ***/
-  //todo set up SG as a utility object and expose create other ways
-  var create = function(data, svgEl, settings) {
-    this.data = data;
-    this.el = svgEl;
-    setSettings(this, settings);
-    init(this);
+(function() {
+  var SG = window['SG'] = function(data, svgEl, settings) {
+    var sg = new Object();
+    sg.data = data;
+    sg.el = svgEl;
+    setSettings(sg, settings);
+    init(sg);
     //clear anything that might get in the way
     //layer another element w/ opaque background if you need to preserve
     if(svgEl != undefined) {
@@ -55,11 +47,11 @@ function SG() {
         svgEl.removeChild(svgEl.lastChild);
       }
       
-      if (this.waitFont) {
-        graphWithFonts.call(this, this.font, this.waitFont);
+      if (sg.waitFont) {
+        graphWithFonts(sg.font, sg.waitFont);
       }
       else {
-        this.graph(this);
+        graph(sg);
       }
     }
    
@@ -105,7 +97,6 @@ function SG() {
     function graphWithFonts(main, wait, txt) {
       var az = isEmpty(txt) ? 'abcdefghijklmnopqrstuvwxyz' : txt;
       var fonts = [main, wait];
-      var self = this;
       var cnt = 0;
       inGraphWithFonts();
       function inGraphWithFonts() {
@@ -122,14 +113,12 @@ function SG() {
           window.setTimeout(inGraphWithFonts, 11);
         }
         else {
-          self.graph(self);
+          graph(sg);
         }
       }
     }
-  }
   
-
-  // set up sorted data, check bounds ...
+    // set up sorted data, check bounds ...
   function init(sg) {
     sg.maxr = (sg.height - sg.rowh * 2)/ sg.rowh;
 
@@ -221,6 +210,8 @@ function SG() {
     
     return sg;
   }
+}
+  
 
   //show row lines & units for debugging positioning
   function drawGrid(el, start, r, h, w, min, d) {
@@ -232,7 +223,7 @@ function SG() {
       
     }
   }
-  SG.prototype.graph = function(sg) {
+  var graph = function(sg) {
     //drawGrid(sg.el, sg.rowh * 2,sg.rowh, sg.height, 800, sg.minh, sg.forced);
     var x = 10; //todo param
     var y = sg.rowh * 2; // padding + headers
@@ -266,7 +257,7 @@ function SG() {
         thisset = [];
         lastmax = maxtw;
         maxtw = sg.textWidth;
-        g = sub(this.el, 'g');
+        g = sub(sg.el, 'g');
       }
 
       if (!isNaN(lastval)) {
@@ -352,7 +343,7 @@ function SG() {
         setEl.textContent = set;
         var htw = setEl.getComputedTextLength();
         at(setEl, 'x', center(htw, maxtw, x));
-        sg.repassGraphSet(thisset, lastset, maxtw, lastmax, sg.rowh, sg.gutterw, sg.lineColor, sg.strokew);
+        SG.prototype.repassGraphSet.call(sg, thisset, lastset, maxtw, lastmax, sg.rowh, sg.gutterw, sg.lineColor, sg.strokew);
       }
     } // end for
   
@@ -467,8 +458,4 @@ function SG() {
   function isEmpty(text) {
     return text == undefined || text.toString().length <  1;
   }
-  
-  if (arguments.length > 1) {
-    create.apply(this,arguments);
-  }
-}
+})();

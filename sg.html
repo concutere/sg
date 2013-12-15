@@ -373,8 +373,7 @@
           to a different sized font (compared to passthru fonts for fontFamily) until the webfont is downloaded
           @import url seems to work better than <link>, at least in chrome
       ***/
-        (function() {
-          var sg = new SG(sample, document.getElementById('sample'), 
+          SG(sample, document.getElementById('sample'), 
           { 'fontSize':15, 
             'fontFamily':'Cabin,Helvetica,Arial,sans-serif',
             'slopeWidth':100, 
@@ -388,7 +387,7 @@
             'height':400,
             'textWidth':10, //setting to 0 can throw off alignment of val-only columns
             'sortVals':'up',
-          });})();
+          });
     </script>
     <p>
     <div class="sub">
@@ -397,8 +396,8 @@
       aggregate data can throw off the scale of differences for individual countries, effectively forcing those rows to be flattened to min height no matter what.
     </div>
     <svg id="gdp"></svg>
-        <script>
-        var sg = new SG(gdp, document.getElementById('gdp'), 
+      <script>
+        SG(gdp, document.getElementById('gdp'), 
           { 'fontSize':12, 
             'fontFamily':'Cabin,Helvetica,Arial,sans-serif',
             'slopeWidth':150, 
@@ -412,8 +411,8 @@
             'height':3000,
             'textWidth':275,
             'sortVals':'down',
-            'rowCurve':'log'
+            //'rowCurve':'log'
           });
-    </script>
+      </script>
     </body>
 </html>
