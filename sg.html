@@ -364,7 +364,7 @@
       <div class="sub">
         First sample uses contrived data that tests many different features at once
       </div>
-       <svg id="sample" style="background-color:lightyellow"></svg>
+       <svg id="sample" style="background-color:lightyellow; "></svg>
    <script>
       /***
           beware FOUT when using webfonts
@@ -374,10 +374,10 @@
           @import url seems to work better than <link>, at least in chrome
       ***/
           SG(sample, document.getElementById('sample'), 
-          { 'fontSize':15, 
+          { 'fontSize':14, 
             'fontFamily':'Cabin,Helvetica,Arial,sans-serif',
             'slopeWidth':100, 
-            'gutterWidth':10,
+            'gutterWidth':5,
             'lineSize':1, 
             'lineOpacity':0.5,
             'lineColor':'#988', 
@@ -401,7 +401,7 @@
           { 'fontSize':12, 
             'fontFamily':'Cabin,Helvetica,Arial,sans-serif',
             'slopeWidth':150, 
-            'gutterWidth':6,
+            'gutterWidth':8,
             'lineSize':1, 
             'lineOpacity':0.3,
             'lineColor':'#234', 
@@ -411,7 +411,7 @@
             'height':3000,
             'textWidth':275,
             'sortVals':'down',
-            //'rowCurve':'log'
+            'rowCurve':'log'
           });
       </script>
     </body>
