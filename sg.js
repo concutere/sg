@@ -130,12 +130,12 @@
     })();
     sg.msort = sg.data.sort(valsort);
     if (sg.sortVals != 'down') {
-      sg.maxh = sg.msort[sg.msort.length-1].val;
-      sg.minh = sg.msort[0].val;
+      sg.maxv = sg.msort[sg.msort.length-1].val;
+      sg.minv = sg.msort[0].val;
     }
     else {
-      sg.minh = sg.msort[sg.msort.length-1].val;
-      sg.maxh = sg.msort[0].val;
+      sg.minv = sg.msort[sg.msort.length-1].val;
+      sg.maxv = sg.msort[0].val;
     }
     for (var i = 1; i < sg.msort.length; i++) {
       //find the minimum delta between vals
@@ -202,10 +202,11 @@
       sg.forceRowY = true;
       sg.maxr = unqr;
       sg.height = Math.ceil(sg.rowh * sg.maxr) + sg.rowh * 2; //padding/set headers
+      sg.forced = (sg.maxv - sg.minv) / unqr;
     }
     else  {
       //data won't fit to scale, need to compress
-      sg.forced = (sg.maxh - sg.minh) / sg.maxr;
+      sg.forced = (sg.maxv - sg.minv) / sg.maxr;
     }
     
     return sg;
@@ -219,12 +220,15 @@
       var y = start + i * r;
       newEl(el,'line','x1',0,'x2',w,'y1',y, 'y2', y, 'stroke', '#444','stroke-width','.2');
       var t = newEl(el,'text','x',0,'y',y, 'fill','#666');
-      t.textContent = parseInt(min + i * d);
+      t.textContent = i;
+      t = newEl(el,'text','x',800,'y',y, 'fill','#666');
+      t.textContent = min + (d < 0 ? (h/r - i - 1) * -d : (i-1) * d);
+      
       
     }
   }
   var graph = function(sg) {
-    //drawGrid(sg.el, sg.rowh * 2,sg.rowh, sg.height, 800, sg.minh, sg.forced);
+    drawGrid(sg.el, sg.rowh * 2,sg.rowh, sg.height, 800, sg.minv, (sg.sortVals == 'up' ? 1 : -1) * sg.forced);
     var x = 10; //todo param
     var y = sg.rowh * 2; // padding + headers
     var oy = y;
@@ -292,7 +296,7 @@
         y += sg.rowh;
       }
       else {
-        var max = (sg.sortVals == 'up' ? sg.minh : sg.maxh);
+        var max = (sg.sortVals == 'up' ? sg.minv : sg.maxv);
         var val = (isNaN(lastval) ? max : max);
         var tmprow = (Math.abs(val - d.val) / sg.forced); // todo precalc row heights for data objects;
         if (sg.rowCurve == 'log') tmprow = Math.log(tmprow);

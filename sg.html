@@ -73,7 +73,7 @@
                 {"id":"Ghana","set":1970,"val":2215.32},
                 {"id":"Gambia, The","set":1970,"val":52.30},
                 {"id":"Guinea-Bissau","set":1970,"val":78.73},
-                {"id":"Equatorial Guinea","set":1970,"val":66.33},
+                //{"id":"Equatorial Guinea","set":1970,"val":66.33},
                 {"id":"Greece","set":1970,"val":12529.70},
                 {"id":"Greenland","set":1970,"val":69.52},
                 {"id":"Guatemala","set":1970,"val":1904.00},
@@ -95,7 +95,7 @@
                 {"id":"Jordan","set":1970,"val":639.52},
                 {"id":"Japan","set":1970,"val":209071.00},
                 {"id":"Kenya","set":1970,"val":1603.45},
-                {"id":"Cambodia","set":1970,"val":718.40},
+                //{"id":"Cambodia","set":1970,"val":718.40},
                 {"id":"Kiribati","set":1970,"val":14.30},
                 {"id":"St. Kitts and Nevis","set":1970,"val":16.30},
                 {"id":"Korea, Rep.","set":1970,"val":8899.73},
@@ -374,7 +374,7 @@
           @import url seems to work better than <link>, at least in chrome
       ***/
           SG(sample, document.getElementById('sample'), 
-          { 'fontSize':14, 
+          { 'fontSize':15, 
             'fontFamily':'Cabin,Helvetica,Arial,sans-serif',
             'slopeWidth':100, 
             'gutterWidth':5,
@@ -395,10 +395,10 @@
       Currently aligning on dates from ET's GDP sample from <a href="http://www.edwardtufte.com/bboard/q-and-a-fetch-msg?msg_id=0003nk">his slopegraphs page</a>,
       aggregate data can throw off the scale of differences for individual countries, effectively forcing those rows to be flattened to min height no matter what.
     </div>
-    <svg id="gdp"></svg>
+    <svg id="gdp" height=3100></svg>
       <script>
         SG(gdp, document.getElementById('gdp'), 
-          { 'fontSize':12, 
+          { 'fontSize':15, 
             'fontFamily':'Cabin,Helvetica,Arial,sans-serif',
             'slopeWidth':150, 
             'gutterWidth':8,
@@ -407,11 +407,11 @@
             'lineColor':'#234', 
             'fontColor':'#234',
             'waitFont':'Cabin,"Courier New"',
-            'resize':true,
-            'height':3000,
+            //'resize':true,
+            'height':3100,
             'textWidth':275,
             'sortVals':'down',
-            'rowCurve':'log'
+            //'rowCurve':'log'
           });
       </script>
     </body>
