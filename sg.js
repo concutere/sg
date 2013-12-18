@@ -120,7 +120,7 @@
   
     // set up sorted data, check bounds ...
   function init(sg) {
-    sg.maxr = (sg.height - sg.rowh * 2)/ sg.rowh;
+    sg.maxr = (sg.height - sg.rowh * 3)/ sg.rowh; //take extra row to account for current item
 
     // msort is an all in one big val-sorted list (for bounds checking)
     var valsort =(function() {
@@ -199,13 +199,13 @@
     unqr = unqidr = unqid.length - 1;
     
     if (sg.maxr < unqr) {
+      //data won't fit to scale, need to compress
       sg.forceRowY = true;
       sg.maxr = unqr;
       sg.height = Math.ceil(sg.rowh * sg.maxr) + sg.rowh * 2; //padding/set headers
       sg.forced = (sg.maxv - sg.minv) / unqr;
     }
     else  {
-      //data won't fit to scale, need to compress
       sg.forced = (sg.maxv - sg.minv) / sg.maxr;
     }
     
@@ -216,15 +216,13 @@
 
   //show row lines & units for debugging positioning
   function drawGrid(el, start, r, h, w, min, d) {
-    for(var i = 1; i < h/r; i++) {
+    for(var i = 1; i < h/r - 1; i++) {
       var y = start + i * r;
       newEl(el,'line','x1',0,'x2',w,'y1',y, 'y2', y, 'stroke', '#444','stroke-width','.2');
       var t = newEl(el,'text','x',0,'y',y, 'fill','#666');
       t.textContent = i;
       t = newEl(el,'text','x',800,'y',y, 'fill','#666');
       t.textContent = min + (d < 0 ? (h/r - i - 1) * -d : (i-1) * d);
-      
-      
     }
   }
   var graph = function(sg) {
@@ -296,11 +294,10 @@
         y += sg.rowh;
       }
       else {
-        var max = (sg.sortVals == 'up' ? sg.minv : sg.maxv);
-        var val = (isNaN(lastval) ? max : max);
-        var tmprow = (Math.abs(val - d.val) / sg.forced); // todo precalc row heights for data objects;
+        var topv = (sg.sortVals == 'up' ? sg.minv : sg.maxv);
+        var tmprow = (Math.abs(topv - d.val) / sg.forced); // todo precalc row heights for data objects;
         if (sg.rowCurve == 'log') tmprow = Math.log(tmprow);
-        tmprow *= sg.rowh;
+        tmprow = (tmprow+1) * sg.rowh;
         if (tmprow < sg.rowh) {
           tmprow = sg.rowh;
         }
