@@ -349,7 +349,9 @@
 
       thisset.push({'id':d.id, 'set':d.set, 'val':d.val, 'x':x, 'y':y, 's':s, 'tw':tw, 'setcnt': setcnt, 'el': el});
  
+ 
       if (s == sg.sorted.length - 1 || sg.sorted[s+1].set != set) {
+        //end of row, set header and do repass for text fitting & lines
         setcnt++;
         //todo accept setLabels as SG params
         at(g, 'width', maxtw);
@@ -358,7 +360,14 @@
                       'font-family', sg.font,'font-size', sg.fontSize+2, 'fill', sg.fontColor);
         setEl.textContent = set;
         var htw = setEl.getComputedTextLength();
-        at(setEl, 'x', center(htw, maxtw, x));
+        var fnx = center;
+        if (setcnt == 1) {
+          fnx = right;
+        }
+        else if (s==sg.sorted.length-1) {
+          fnx = left;
+        }
+        at(setEl, 'x', fnx(htw, maxtw, x));
         if (sg.sortVals == 'down') fitPriorRows(thisset,thisset.length-1, sg.rowh, oy, true); //todo this shouldn't be necessary, still needed for sort desc ...
         SG.prototype.repassGraphSet.call(sg, thisset, lastset, maxtw, lastmax, sg.rowh, sg.gutterw, sg.lineColor, sg.strokew);
       }
