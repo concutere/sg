@@ -493,50 +493,54 @@
     <div class="sub">
       This example copies data from ET's GDP sample from <a href="http://www.edwardtufte.com/bboard/q-and-a-fetch-msg?msg_id=0003nk">his slopegraphs page</a>.
     </div>
-    <svg id="etgdp" style="background-color:#eef; width:750px" height=905></svg>
-      <script>
-        SG(etgdp, document.getElementById('etgdp'), 
-          { 'fontSize':12, 
-            'fontFamily':'Cabin,Helvetica,Arial,sans-serif',
-            'slopeWidth':150, 
-            'gutterWidth':8,
-            'lineSize':1, 
-            'lineOpacity':0.3,
-            'lineColor':'#234', 
-            'fontColor':'#234',
-            'waitFont':'Cabin,"Courier New"',
-            //'resize':true,
-            'height':900,
-            'textWidth':275,
-            'sortVals':'down',
-            //'rowCurve':'log',
-            //'debugGrid' : true,
-         });
-      </script>
+    <div class=center>
+      <svg id="etgdp" style="background-color:#eef; width:750px" height=905></svg>
+        <script>
+          SG(etgdp, document.getElementById('etgdp'), 
+            { 'fontSize':12, 
+              'fontFamily':'Cabin,Helvetica,Arial,sans-serif',
+              'slopeWidth':150, 
+              'gutterWidth':8,
+              'lineSize':1, 
+              'lineOpacity':0.3,
+              'lineColor':'#234', 
+              'fontColor':'#234',
+              'waitFont':'Cabin,"Courier New"',
+              //'resize':true,
+              'height':900,
+              'textWidth':275,
+              'sortVals':'down',
+              //'rowCurve':'log',
+              //'debugGrid' : true,
+           });
+        </script>
+      </div>
     <p><hr><p>
     <div class="sub">
       This example copies data from ET's cancer sample from <a href="http://www.edwardtufte.com/bboard/q-and-a-fetch-msg?msg_id=0003nk">his slopegraphs page</a>. Support for displaying each row discretely (as in the original example) still to come.
     </div>
-    <svg id="etcancer" style="background-color:#fff; width:900px" height=805></svg>
-      <script>
-        SG(etcancer, document.getElementById('etcancer'), 
-          { 'fontSize':14, 
-            'fontFamily':'Cabin,Helvetica,Arial,sans-serif',
-            'slopeWidth':75, 
-            'gutterWidth':5,
-            'lineSize':1, 
-            'lineOpacity':0.5,
-            'lineColor':'#234', 
-            'fontColor':'#234',
-            'waitFont':'Cabin,"Courier New"',
-            //'resize':true,
-            'height':800,
-            'textWidth':10,
-            'sortVals':'down',
-            //'rowCurve':'log',
-            //'debugGrid' : true,
-         });
-      </script>
+    <div class=center>
+      <svg id="etcancer" style="background-color:#fff; width:600px" height=805></svg>
+        <script>
+          SG(etcancer, document.getElementById('etcancer'), 
+            { 'fontSize':14, 
+              'fontFamily':'Cabin,Helvetica,Arial,sans-serif',
+              'slopeWidth':75, 
+              'gutterWidth':5,
+              'lineSize':1, 
+              'lineOpacity':0.5,
+              'lineColor':'#234', 
+              'fontColor':'#234',
+              'waitFont':'Cabin,"Courier New"',
+              //'resize':true,
+              'height':800,
+              'textWidth':10,
+              'sortVals':'down',
+              //'rowCurve':'log',
+              //'debugGrid' : true,
+           });
+        </script>
+      </div>
       <p><hr><p>
     <div class="sub">
       This example uses GDP data from <a href="http://data.worldbank.org/indicator/NY.GDP.MKTP.CD">World Bank data</a>.
@@ -544,31 +548,34 @@
       Excluding data not present for all shown years.
       Using log scaling of vals in display calculations to better fit rows with such wide value and row-to-row-delta variances.
     </div>
-    <svg id="gdp" style="background-color:#eef; width:900px" height=3200></svg>
-      <script>
-        SG(gdp, document.getElementById('gdp'), 
-          { 'fontSize':15, 
-            'fontFamily':'Cabin,Helvetica,Arial,sans-serif',
-            'slopeWidth':150, 
-            'gutterWidth':8,
-            'lineSize':1, 
-            'lineOpacity':0.3,
-            'lineColor':'#234', 
-            'fontColor':'#234',
-            'waitFont':'Cabin,"Courier New"',
-            //'resize':true,
-            'height':3200,
-            'textWidth':275,
-            'sortVals':'down',
-            'rowCurve':'log',
-            //'debugGrid' : true,
-         });
-      </script>
+    <div class=center>
+      <svg id="gdp" style="background-color:#eef; width:900px" height=3200></svg>
+        <script>
+          SG(gdp, document.getElementById('gdp'), 
+            { 'fontSize':15, 
+              'fontFamily':'Cabin,Helvetica,Arial,sans-serif',
+              'slopeWidth':150, 
+              'gutterWidth':8,
+              'lineSize':1, 
+              'lineOpacity':0.3,
+              'lineColor':'#234', 
+              'fontColor':'#234',
+              'waitFont':'Cabin,"Courier New"',
+              //'resize':true,
+              'height':3200,
+              'textWidth':275,
+              'sortVals':'down',
+              'rowCurve':'log',
+              //'debugGrid' : true,
+           });
+        </script>
+      </div>
       <p><hr><p>
           <div class="sub">
         This sample uses contrived data for testing new features
       </div>
-       <svg id="sample" style="background-color:lightyellow; width:800px" height=400></svg>
+    <div class=center>
+       <svg id="sample" style="background-color:lightyellow; width:800px" height=405></svg>
    <script>
       /***
           beware FOUT when using webfonts
@@ -593,11 +600,13 @@
             'sortVals':'up',
           });
     </script>
+    </div>
     <p><hr><p>
     <div class="sub">
         This is the above data, sorted down & showing debug grid
       </div>
-       <svg id="sampled" style="background-color:lightyellow;  width:1000px" height=300></svg>
+    <div class=center>
+       <svg id="sampled" style="background-color:lightyellow;  width:1000px" height=405></svg>
    <script>
       /***
           beware FOUT when using webfonts
@@ -617,12 +626,12 @@
             'fontColor':'#221',
             'waitFont':'Cabin,"Courier New"',
             //'resize':true,
-            'height':300,
+            'height':400,
             'textWidth':10, //setting to 0 can throw off alignment of val-only columns
             'sortVals':'down',
             'debugGrid' : true,
           });
     </script>
-
+    </div>
     </body>
 </html>
