@@ -360,11 +360,12 @@
     </style>    
   </head>
   <body style=";background-color:#eee">
-    <div class="huge center">Some sample Slopegraphs</div>
-      <div class="sub">
+  <a href="https://github.com/concutere/sg"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png" alt="Fork me on GitHub"></a>
+    <div class="huge center">SG.js - Slopegraph samples</div>
+    <div class="sub">
         First sample uses contrived data that tests many different features at once
       </div>
-       <svg id="sample" style="background-color:lightyellow; " height=400></svg>
+       <svg id="sample" style="background-color:lightyellow; width:800px" height=400></svg>
    <script>
       /***
           beware FOUT when using webfonts
@@ -393,7 +394,7 @@
     <div class="sub">
         This is the above data, sorted down & showing debug grid
       </div>
-       <svg id="sampled" style="background-color:lightyellow; " height=400></svg>
+       <svg id="sampled" style="background-color:lightyellow;  width:1000px" height=400></svg>
    <script>
       /***
           beware FOUT when using webfonts
@@ -426,9 +427,9 @@
       Excluding data not present for all shown years.
       Using log scaling of vals in display calculations to better fit rows with such wide value and row-to-row-delta variances.
     </div>
-    <svg id="gdp" height=3200></svg>
+    <svg id="gdp" style="background-color:#eef; width:900px" height=3200></svg>
       <script>
-        SG(gdp, document.getElementById('gdp'), 
+        var ttt = SG(gdp, document.getElementById('gdp'), 
           { 'fontSize':15, 
             'fontFamily':'Cabin,Helvetica,Arial,sans-serif',
             'slopeWidth':150, 
