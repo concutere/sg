@@ -2,6 +2,8 @@ SG - a library for creating slopegraphs
 
 ==
 
+(see [here](http://concutere.com/sg/sg.html) for live samples)
+
 sg.js creates SVG content, is dependency-free and should work in modern browsers with SVG support. 
 
 To use, call SG(jsonData, svgElement, settings). Data is expected as a json array with 'id', 'set' & 'val' attributes. Settings are optional but you most likely will want to set at least textWidth, slopeWidth & height. See sg.html for samples.
