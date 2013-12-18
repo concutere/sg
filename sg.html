@@ -22,7 +22,7 @@
                   {'id':'didjeridoo', 'set':1993, 'val':33},
                   {'id':'didjeridoo', 'set':2012, 'val':13},
                   {'id':'blue', 'set':1993, 'val':83}];
-                  
+
       var gdp =[{"id":"Andorra","set":1970,"val":78.62},
                 {"id":"Afghanistan","set":1970,"val":1748.89},
                 {"id":"Arab World","set":1970,"val":39078.46},
@@ -386,6 +386,35 @@
             //'resize':true,
             'height':400,
             'textWidth':10, //setting to 0 can throw off alignment of val-only columns
+            'sortVals':'up',
+          });
+    </script>
+    <p>
+    <div class="sub">
+        This is the above data, sorted down
+      </div>
+       <svg id="sampled" style="background-color:lightyellow; " height=400></svg>
+   <script>
+      /***
+          beware FOUT when using webfonts
+          FOUT: flash of unstyled text
+          you can use a waitFont setting, a font-family value intended to passthru 
+          to a different sized font (compared to passthru fonts for fontFamily) until the webfont is downloaded
+          @import url seems to work better than <link>, at least in chrome
+      ***/
+          SG(SG.clone(sample), document.getElementById('sampled'), 
+          { 'fontSize':15, 
+            'fontFamily':'Cabin,Helvetica,Arial,sans-serif',
+            'slopeWidth':100, 
+            'gutterWidth':5,
+            'lineSize':1, 
+            'lineOpacity':0.5,
+            'lineColor':'#988', 
+            'fontColor':'#221',
+            'waitFont':'Cabin,"Courier New"',
+            //'resize':true,
+            'height':400,
+            'textWidth':10, //setting to 0 can throw off alignment of val-only columns
             'sortVals':'down',
           });
     </script>
@@ -410,7 +439,7 @@
             //'resize':true,
             'height':3100,
             'textWidth':275,
-            'sortVals':'down',
+            'sortVals':'up',
             //'rowCurve':'log'
           });
       </script>

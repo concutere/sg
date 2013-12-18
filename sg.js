@@ -219,10 +219,10 @@
     var maxi = h/r - 1;
     for(var i = 1; i < maxi; i++) {
       var y = start + i * r;
-      newEl(el,'line','x1',0,'x2',w,'y1',y, 'y2', y, 'stroke', '#444','stroke-width','.2');
-      var t = newEl(el,'text','x',0,'y',y, 'fill','#666');
+      newEl(el,'line','x1',0,'x2',w,'y1',y, 'y2', y, 'stroke', '#bbb','stroke-width','.5');
+      var t = newEl(el,'text','x',0,'y',y, 'fill','#bbb');
       t.textContent = i;
-      t = newEl(el,'text','x',800,'y',y, 'fill','#666');
+      t = newEl(el,'text','x',800,'y',y, 'fill','#bbb');
       t.textContent = min + (d < 0 ? (maxi - i - 1) * -d : (i-1) * d);
     }
   }
@@ -358,7 +358,7 @@
         setEl.textContent = set;
         var htw = setEl.getComputedTextLength();
         at(setEl, 'x', center(htw, maxtw, x));
-        fitPriorRows(thisset,thisset.length-1, sg.rowh, oy, true); //todo this shouldn't be necessary, still needed for sort desc ...
+        if (sg.sortVals == 'down') fitPriorRows(thisset,thisset.length-1, sg.rowh, oy, true); //todo this shouldn't be necessary, still needed for sort desc ...
         SG.prototype.repassGraphSet.call(sg, thisset, lastset, maxtw, lastmax, sg.rowh, sg.gutterw, sg.lineColor, sg.strokew);
       }
     } // end for
@@ -484,5 +484,13 @@
   
   function isEmpty(text) {
     return text == undefined || text.toString().length <  1;
+  }
+  
+  SG.clone = function(d) {
+    var r = [];
+    for (i in d) {
+      r[i] = d[i];
+    }
+    return r;
   }
 })();
