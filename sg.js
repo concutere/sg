@@ -216,13 +216,14 @@
 
   //show row lines & units for debugging positioning
   function drawGrid(el, start, r, h, w, min, d) {
-    for(var i = 1; i < h/r - 1; i++) {
+    var maxi = h/r - 1;
+    for(var i = 1; i < maxi; i++) {
       var y = start + i * r;
       newEl(el,'line','x1',0,'x2',w,'y1',y, 'y2', y, 'stroke', '#444','stroke-width','.2');
       var t = newEl(el,'text','x',0,'y',y, 'fill','#666');
       t.textContent = i;
       t = newEl(el,'text','x',800,'y',y, 'fill','#666');
-      t.textContent = min + (d < 0 ? (h/r - i - 1) * -d : (i-1) * d);
+      t.textContent = min + (d < 0 ? (maxi - i - 1) * -d : (i-1) * d);
     }
   }
   var graph = function(sg) {
@@ -263,27 +264,35 @@
       }
 
       if (!isNaN(lastval)) {
+        //todo dup checking currently misses dup adjustments on last 2 rows in dataset!!
         if (lastval == d.val) {
-          if(dupcnt++ == 0)
+          if(dupcnt++ == 0) {
             dupcnt++;
+            predupy = y;
+          }
         }
         else if (dupcnt > 0) {
           var diff = sg.rowh * (dupcnt-1)/2;          
           var ydiff = Math.abs(y - predupy);
 
-          if (diff + sg.rowh * dupcnt > ydiff ) {
-            diff = thisset[thisset.length-(dupcnt)].y - predupy - sg.rowh;
-          }
+          /*if (diff + sg.rowh * dupcnt > ydiff ) {
+            diff = Math.abs(thisset[thisset.length-(dupcnt)].y - predupy) - (sg.sortVals == 'up' ? sg.rowh : -sg.rowh); 
+          }*/
          if (diff > 0) {
-            for (var i = thisset.length-1; i >= thisset.length-dupcnt; i--) {
+            var startat = thisset.length-1;
+            var upto = thisset.length-dupcnt;
+            var step = function(v) { return v-1;}
+            for (var i = startat; i >= upto; i = step(i)) {
               thisset[i].y -= diff;
               at(thisset[i].el, 'y', thisset[i].y);
               dupoff += diff;
             }
+            fitPriorRows(thisset,upto,sg.rowh,oy);
           }
           dupcnt = 0;
           predupy = y;
         }
+        
       }
       else {
         dupcnt = 0;
@@ -310,7 +319,12 @@
         if (thisset.length > 0 && y < thisset[thisset.length-1].y + sg.rowh)
           y = thisset[thisset.length-1].y + sg.rowh;
       }
-
+      
+      //todo move this to repass?
+      if (!sg.resize && y > sg.height) {
+        y = sg.height;
+      }
+      
       lastval = d.val;
          
       //todo val & id get their own text el
@@ -344,6 +358,7 @@
         setEl.textContent = set;
         var htw = setEl.getComputedTextLength();
         at(setEl, 'x', center(htw, maxtw, x));
+        fitPriorRows(thisset,thisset.length-1, sg.rowh, oy, true); //todo this shouldn't be necessary, still needed for sort desc ...
         SG.prototype.repassGraphSet.call(sg, thisset, lastset, maxtw, lastmax, sg.rowh, sg.gutterw, sg.lineColor, sg.strokew);
       }
     } // end for
@@ -352,7 +367,16 @@
       resizeEl(sg);
     }
   }
-  
+
+  function fitPriorRows(thisset, startat, rowh, oy, checkAll) {
+    while (startat > 0 && (checkAll || thisset[startat].y >= oy+rowh)
+            && thisset[startat].y - thisset[startat-1].y < rowh) {
+      thisset[startat-1].y = thisset[startat].y - rowh;
+      startat--;
+      at(thisset[startat].el, 'y', thisset[startat].y);
+    }
+  }
+
   function center(width, containerWidth, offset) {
     return offset + (containerWidth / 2 - width / 2);
   }
@@ -413,15 +437,17 @@
   }
   
   SG.prototype.repassGraphSet = function(curr, last, maxtw, width, height, gutter, color, strokeWidth) {
-
     for(var c = 0; c < curr.length; c++) {
       fixTextWidth.call(this,curr[c]);
       if (last && last.length > 0) {
         for(var l = 0; l < last.length; l++) {
           if(curr[c].id == last[l].id) {
             var line = newEl(this.el, 'line', 'x1', last[l].x + width + gutter,
-              'x2', curr[c].x - gutter, 'y1', last[l].y - height/6,  // todo the factor of 6 here feels really arbitrary, may break with widely varying font sizes
-              'y2', curr[c].y - height/6, 'stroke', color, 'stroke-width', strokeWidth, 'stroke-opacity',this.lineOpacity);
+              'x2', curr[c].x - gutter, 'y1', last[l].y - height/4, 
+              'y2', curr[c].y - height/4, 'stroke', color, 'stroke-width', strokeWidth, 'stroke-opacity',this.lineOpacity);
+          }
+          else {
+            //todo check for overlapping rows
           }
         }
       }
