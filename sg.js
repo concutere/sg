@@ -87,6 +87,7 @@
       sg.lineOpacity = parseFloat(isNaN(settings.lineOpacity) ? 1 : settings.lineOpacity);
       sg.sortVals = isEmpty(settings.sortVals)                ? 'up' : settings.sortVals; // for vals, also: 'down', 'flat'
       if(!isEmpty(settings.rowCurve)) sg.rowCurve = settings.rowCurve;
+      if (settings.debugGrid === true) sg.debugGrid = true;
     }
 
     /*** using waitFont setting
@@ -227,7 +228,7 @@
     }
   }
   var graph = function(sg) {
-    drawGrid(sg.el, sg.rowh * 2,sg.rowh, sg.height, 800, sg.minv, (sg.sortVals == 'up' ? 1 : -1) * sg.forced);
+    if(sg.debugGrid) drawGrid(sg.el, sg.rowh * 2,sg.rowh, sg.height, 800, sg.minv, (sg.sortVals == 'up' ? 1 : -1) * sg.forced);
     var x = 10; //todo param
     var y = sg.rowh * 2; // padding + headers
     var oy = y;

@@ -20,7 +20,7 @@
 
                   {'id':'blue', 'set':2012, 'val':13},
                   {'id':'didjeridoo', 'set':1993, 'val':33},
-                  {'id':'didjeridoo', 'set':2012, 'val':13},
+                  {'id':'didjeridoo', 'set':2012, 'val':15},
                   {'id':'blue', 'set':1993, 'val':83}];
 
       var gdp =[{"id":"Andorra","set":1970,"val":78.62},
@@ -391,7 +391,7 @@
     </script>
     <p>
     <div class="sub">
-        This is the above data, sorted down
+        This is the above data, sorted down & showing debug grid
       </div>
        <svg id="sampled" style="background-color:lightyellow; " height=400></svg>
    <script>
@@ -416,15 +416,17 @@
             'height':400,
             'textWidth':10, //setting to 0 can throw off alignment of val-only columns
             'sortVals':'down',
+            'debugGrid' : true,
           });
     </script>
     <p>
     <div class="sub">
       This example uses GDP data from <a href="http://data.worldbank.org/indicator/NY.GDP.MKTP.CD">World Bank data</a>.
-      Currently aligning on dates from ET's GDP sample from <a href="http://www.edwardtufte.com/bboard/q-and-a-fetch-msg?msg_id=0003nk">his slopegraphs page</a>,
-      aggregate data can throw off the scale of differences for individual countries, effectively forcing those rows to be flattened to min height no matter what.
+      Currently aligning on dates from ET's GDP sample from <a href="http://www.edwardtufte.com/bboard/q-and-a-fetch-msg?msg_id=0003nk">his slopegraphs page</a>.
+      Excluding data not present for all shown years.
+      Using log scaling of vals in display calculations to better fit rows with such wide value and row-to-row-delta variances.
     </div>
-    <svg id="gdp" height=3100></svg>
+    <svg id="gdp" height=3200></svg>
       <script>
         SG(gdp, document.getElementById('gdp'), 
           { 'fontSize':15, 
@@ -437,11 +439,12 @@
             'fontColor':'#234',
             'waitFont':'Cabin,"Courier New"',
             //'resize':true,
-            'height':3100,
+            'height':3200,
             'textWidth':275,
-            'sortVals':'up',
-            //'rowCurve':'log'
-          });
+            'sortVals':'down',
+            'rowCurve':'log',
+            //'debugGrid' : true,
+         });
       </script>
     </body>
 </html>
