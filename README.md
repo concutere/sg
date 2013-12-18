@@ -8,7 +8,9 @@ sg.js creates SVG content, is dependency-free and should work in modern browsers
 
 To use, call SG(jsonData, svgElement, settings). Data is expected as a json array with 'id', 'set' & 'val' attributes. Settings are optional but you most likely will want to set at least textWidth, slopeWidth & height. See sg.html for samples.
 
-So far the fitting logic is fairly simple, more options and improvements here are the current focus.
+So far the fitting logic has so far been kept relatively simple. Improved fitting algorithms & related options are the current focus, trying to provide better layout without killing performance.
+
+==
 
 Happy graphing!
 
