@@ -127,7 +127,8 @@
   
     // set up sorted data, check bounds ...
   function init(sg) {
-    sg.maxr = (sg.height - sg.offsetY - sg.rowh * 2)/ sg.rowh; //take extra row to account for current item
+    var offsetr = (sg.offsetY > 0 ? sg.offsetY + sg.rowh : sg.rowh * 3); //todo this doesn't feel right, too much fudge
+    sg.maxr = (sg.height - offsetr )/ sg.rowh; //take extra row to account for current item
 
     // msort is an all in one big val-sorted list (for bounds checking)
     var valsort =(function() {

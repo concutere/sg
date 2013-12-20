@@ -521,7 +521,7 @@
       This example copies data from ET's cancer sample from <a href="http://www.edwardtufte.com/bboard/q-and-a-fetch-msg?msg_id=0003nk">his slopegraphs page</a>. Support for displaying each row discretely (as in the original example) still to come.
     </div>
     <div class=center>
-      <svg id="etcancer" style="background-color:#fff; width:600px" height=805></svg>
+      <svg id="etcancer" style="background-color:#fff; width:550px" height=805></svg>
         <script>
           SG(etcancer, document.getElementById('etcancer'), 
             { 'fontSize':14, 
@@ -535,13 +535,12 @@
               'waitFont':'Cabin,"Courier New"',
               //'resize':true,
               'height':800,
-              'width':600,
+              'width':550,
               'textWidth':10,
               'sortVals':'down',
               //'rowCurve':'log',
               //'debugGrid' : true,
               'offsetY':45, // offsetY expects a width to also be passed, defaults to 600
-              'width':600, 
               'doc':'Estimates of % survival rates',
               
            });
