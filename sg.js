@@ -83,11 +83,17 @@
       sg.lineColor = isEmpty(settings.lineColor)              ? 'lightslategray' : settings.lineColor;
       
       sg.textWidth = parseInt(isNaN(settings.textWidth)       ? 0 : settings.textWidth); // 0 (or any < 1) defaults to no max
-      sg.height = parseInt(isNaN(settings.height)             ? 480 : settings.height);
+      sg.height = parseInt(isNaN(settings.height)             ? 600 : settings.height);
       sg.lineOpacity = parseFloat(isNaN(settings.lineOpacity) ? 1 : settings.lineOpacity);
       sg.sortVals = isEmpty(settings.sortVals)                ? 'up' : settings.sortVals; // for vals, also: 'down', 'flat'
+
+      sg.offsetX = isNaN(settings.offsetX)                    ? 0 : settings.offsetX;
+      sg.offsetY = isNaN(settings.offsetY)                    ? 0 : settings.offsetY;
       if(!isEmpty(settings.rowCurve)) sg.rowCurve = settings.rowCurve;
       if (settings.debugGrid === true) sg.debugGrid = true;
+      if (!isEmpty(settings.doc)) sg.doc = settings.doc;
+      if (!isNaN(settings.width)) sg.width = settings.width;
+      if (!isNaN(settings.decimals)) sg.decimals = settings.decimals;
     }
 
     /*** using waitFont setting
@@ -121,7 +127,7 @@
   
     // set up sorted data, check bounds ...
   function init(sg) {
-    sg.maxr = (sg.height - sg.rowh * 3)/ sg.rowh; //take extra row to account for current item
+    sg.maxr = (sg.height - sg.offsetY - sg.rowh * 2)/ sg.rowh; //take extra row to account for current item
 
     // msort is an all in one big val-sorted list (for bounds checking)
     var valsort =(function() {
@@ -216,21 +222,27 @@
   
 
   //show row lines & units for debugging positioning
-  function drawGrid(el, start, r, h, w, min, d) {
+  function drawGrid(el, start, r, h, w, min, d, x, y, useLog) {
     var maxi = h/r - 1;
     for(var i = 1; i < maxi; i++) {
       var y = start + i * r;
-      newEl(el,'line','x1',0,'x2',w,'y1',y, 'y2', y, 'stroke', '#bbb','stroke-width','.5');
-      var t = newEl(el,'text','x',0,'y',y, 'fill','#bbb');
+      newEl(el,'line','x1',x,'x2',w,'y1',y, 'y2', y, 'stroke', '#bbb','stroke-width','.5');
+      var t = newEl(el,'text','x',x,'y',y, 'fill','#bbb');
       t.textContent = i;
       t = newEl(el,'text','x',800,'y',y, 'fill','#bbb');
-      t.textContent = min + (d < 0 ? (maxi - i - 1) * -d : (i-1) * d);
+      var val = min + (d < 0 ? (maxi - i - 1) * -d : (i-1) * d);
+      if (useLog) {
+        t.textContent = Math.log(val);
+      }
+      else {
+        t.textContent = val;
+      }
     }
   }
   var graph = function(sg) {
-    if(sg.debugGrid) drawGrid(sg.el, sg.rowh * 2,sg.rowh, sg.height, 800, sg.minv, (sg.sortVals == 'up' ? 1 : -1) * sg.forced);
-    var x = 10; //todo param
-    var y = sg.rowh * 2; // padding + headers
+    if(sg.debugGrid) drawGrid(sg.el, sg.rowh * 2,sg.rowh, sg.height, 800, sg.minv, (sg.sortVals == 'up' ? 1 : -1) * sg.forced, sg.offsetX, sg.offsetY, sg.rowCurve == 'log');
+    var x = sg.offsetX > 0 ? sg.offsetX : 10; //todo param padding
+    var y = sg.offsetY > 0 ? sg.offsetY : sg.rowh * 2; // padding + headers
     var oy = y;
     var set;
     var lastval;
@@ -246,6 +258,33 @@
     var dupcnt = 0;
     var predupy = y;
     var dupoff = 0;
+    
+    /***
+        doc box
+    ***/
+    docBox(sg.el, sg.doc, sg.width, sg.offsetX, sg.offsetY, y, sg.rowh+2, sg.font, sg.fontSize+2, sg.fontColor);
+    function docBox(parent, doc, svgWidth, offsetX, offsetY, y, rowHeight, font, fontSize, fontColor) {
+      if (offsetX > 0) {
+        var docw = offsetX - 10; //todo parameterize outer border or just use padding in style?
+        var docel;
+        var doclines = doc.split('\n');
+        var docy = y + rowHeight;
+        for (var i = 0; i < doclines.length; i++) {
+          docel = newEl(parent,'text','x',10,'y', docy,'width',docw,'height',rowHeight,'font-family',font,'font-size',fontSize, 'fill', fontColor);
+          docel.textContent = doclines[i];
+          docy+=rowHeight;
+        }
+      }
+       else if (offsetY > 0) {
+        // todo draw above set headers when offsetY > 0
+        // no faux text-wrapping here
+        var doch = offsetY; // todo param outer pad
+        var docel = newEl(parent,'text','x',10,'y', rowHeight,'height',doch,'font-family',font,'font-size',fontSize, 'fill', fontColor);
+        docel.textContent = doc;
+        at(docel,'x',centerText(docel,svgWidth,10));
+      }
+    }
+    
     for (var s = 0; s < sg.sorted.length; s++) {
       var d = sg.sorted[s];
       if (isNaN(set) || d.set > set) {
@@ -255,13 +294,13 @@
           x += maxtw + sg.slopew + sg.gutterw * 2;
         }
         set = d.set;
-        y = sg.rowh * 2; 
+        y = oy; 
         lastval = undefined;
         lastset = thisset;
         thisset = [];
         lastmax = maxtw;
         maxtw = sg.textWidth;
-        g = sub(sg.el, 'g');
+        g = newEl(sg.el, 'g');
       }
 
       if (!isNaN(lastval)) {
@@ -316,7 +355,7 @@
           tmprow -= reduceBy;
           dupoff -= reduceBy;
         }
-        y = tmprow + sg.rowh * 2;
+        y = tmprow + oy;
         if (thisset.length > 0 && y < thisset[thisset.length-1].y + sg.rowh)
           y = thisset[thisset.length-1].y + sg.rowh;
       }
@@ -333,15 +372,26 @@
         'id', s, 'y', y, 'x', x,
          'font-family', sg.font, 'font-size', sg.fontSize, 'fill', sg.fontColor);
 
+      var val = formatVal(sg.rowCurve == 'log' ? Math.log(d.val) : d.val, sg.decimals);
+      function formatVal(val, places) {
+        if(isNaN(places) || places <= 0) {
+          return parseInt(val);
+        }
+        else {
+          return parseFloat(val).toFixed(places);
+        }
+      }
+      
+      //todo separate id & val into separate els for better alignment
       if (setcnt == 0) {
         // align right, id before val
-        el.textContent = d.id + ' ' + d.val;
+        el.textContent = d.id + ' ' + val;
       }
       else if (setcnt == sg.setc - 1 || s == sg.sorted.length - 1) {
         //align left, val before id
-          el.textContent = '' + d.val + ' ' + d.id;
+          el.textContent = '' + val + ' ' + d.id;
       }
-      else el.textContent = d.val; 
+      else el.textContent = val; 
       var tw = el.getComputedTextLength();
       if (maxtw < tw) {
         maxtw = tw;
@@ -355,8 +405,9 @@
         setcnt++;
         //todo accept setLabels as SG params
         at(g, 'width', maxtw);
+        var sety = sg.offsetY > 0 ? sg.offsetY : sg.rowh;
         var setEl = newEl(g, 'text',    
-                      'id','set'+set, 'y', sg.rowh, 
+                      'id','set'+set, 'y', sety, 
                       'font-family', sg.font,'font-size', sg.fontSize+2, 'fill', sg.fontColor);
         setEl.textContent = set;
         var htw = setEl.getComputedTextLength();
@@ -396,6 +447,11 @@
   function left(width, containerWidth, offset) {
     return offset;
   }
+  
+  function centerText(el, containerWidth, offset) {
+    var w = el.getComputedTextLength();
+    return center(w, containerWidth, offset);
+  }
 
   /***
     atts should be array (or json?) of strings of css attribute assignments
@@ -424,7 +480,7 @@
     }
     return el;
   }
-  
+
   /***
       Firefox won't force container height to grow to accommodate new svg el height
       when declaring <!DOCTYPE html>
@@ -468,12 +524,6 @@
     }
   }
 
-  function sub(parent, name, leaveParentless) {
-    var el = document.createElementNS("http://www.w3.org/2000/svg",name);
-      if (leaveParentless !== true) 
-        parent.appendChild(el);
-    return el;
-  }
   function at(parent, name, value) {
     parent.setAttribute(name, value);
     return parent;

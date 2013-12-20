@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <title>SG.js - Slopegraphs for the web</title>
     <script type="text/javascript" src="sg.js">
     </script>
     <script>
@@ -508,10 +509,11 @@
               'waitFont':'Cabin,"Courier New"',
               //'resize':true,
               'height':900,
-              'textWidth':275,
+              'textWidth':100,
               'sortVals':'down',
-              //'rowCurve':'log',
-              //'debugGrid' : true,
+              'decimals':1,
+              'offsetX':200,
+              'doc': 'Current Receipts of Government as a \nPercentage of Gross Domestic \nProduct, 1970 and 1979',
            });
         </script>
       </div>
@@ -534,10 +536,14 @@
               'waitFont':'Cabin,"Courier New"',
               //'resize':true,
               'height':800,
+              'width':600,
               'textWidth':10,
               'sortVals':'down',
               //'rowCurve':'log',
               //'debugGrid' : true,
+              'offsetY':40,
+              'doc':'Estimates of % survival rates',
+              
            });
         </script>
       </div>
@@ -567,6 +573,7 @@
               'sortVals':'down',
               'rowCurve':'log',
               //'debugGrid' : true,
+              'decimals':2,
            });
         </script>
       </div>
