@@ -230,7 +230,7 @@
       var t = newEl(el,'text','x',x,'y',y, 'fill','#bbb');
       t.textContent = i;
       t = newEl(el,'text','x',800,'y',y, 'fill','#bbb');
-      var val = min + (d < 0 ? (maxi - i - 1) * -d : (i-1) * d);
+      var val = parseFloat(min + (d < 0 ? (maxi - i - 1) * -d : (i-1) * d)).toFixed(2);
       if (useLog) {
         t.textContent = Math.log(val);
       }
@@ -262,7 +262,7 @@
     /***
         doc box
     ***/
-    docBox(sg.el, sg.doc, sg.width, sg.offsetX, sg.offsetY, y, sg.rowh+2, sg.font, sg.fontSize+2, sg.fontColor);
+    docBox(sg.el, sg.doc, sg.width, sg.offsetX, sg.offsetY, y, sg.rowh+4, sg.font, sg.fontSize+4, sg.fontColor);
     function docBox(parent, doc, svgWidth, offsetX, offsetY, y, rowHeight, font, fontSize, fontColor) {
       if (offsetX > 0) {
         var docw = offsetX - 10; //todo parameterize outer border or just use padding in style?

@@ -481,7 +481,6 @@
         font-weight:bold;
       }
       .center {
-        width:100%;
         text-align:center;
       }
       svg {
@@ -495,7 +494,7 @@
       This example copies data from ET's GDP sample from <a href="http://www.edwardtufte.com/bboard/q-and-a-fetch-msg?msg_id=0003nk">his slopegraphs page</a>.
     </div>
     <div class=center>
-      <svg id="etgdp" style="background-color:#eef; width:750px" height=905></svg>
+      <svg id="etgdp" style="background-color:#eef; width:650px" height=905></svg>
         <script>
           SG(etgdp, document.getElementById('etgdp'), 
             { 'fontSize':12, 
@@ -512,7 +511,7 @@
               'textWidth':100,
               'sortVals':'down',
               'decimals':1,
-              'offsetX':200,
+              'offsetX':275,
               'doc': 'Current Receipts of Government as a \nPercentage of Gross Domestic \nProduct, 1970 and 1979',
            });
         </script>
@@ -541,7 +540,8 @@
               'sortVals':'down',
               //'rowCurve':'log',
               //'debugGrid' : true,
-              'offsetY':40,
+              'offsetY':45, // offsetY expects a width to also be passed, defaults to 600
+              'width':600, 
               'doc':'Estimates of % survival rates',
               
            });
@@ -613,7 +613,7 @@
         This is the above data, sorted down & showing debug grid
       </div>
     <div class=center>
-       <svg id="sampled" style="background-color:lightyellow;  width:1000px" height=405></svg>
+       <svg id="sampled" style="background-color:lightyellow; width:850px" height=405></svg>
    <script>
       /***
           beware FOUT when using webfonts
