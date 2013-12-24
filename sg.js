@@ -366,7 +366,6 @@
         'id', s, 'y', y, 'x', x,
          'font-family', sg.font, 'font-size', sg.fontSize, 'fill', sg.fontColor);
 
-      var val = formatVal(sg.rowCurve == 'log' ? Math.log(d.val) : d.val, sg.decimals);
       function formatVal(val, places) {
         if(isNaN(places) || places <= 0) {
           return parseInt(val);
@@ -375,6 +374,7 @@
           return parseFloat(val).toFixed(places);
         }
       }
+      var val = formatVal(sg.rowCurve == 'log' ? Math.log(d.val) : d.val, sg.decimals);
       
       //todo separate id & val into separate els for better alignment
       if (setcnt == 0) {
