@@ -518,7 +518,7 @@
       </div>
     <p><hr><p>
     <div class="sub">
-      This example copies data from ET's cancer sample from <a href="http://www.edwardtufte.com/bboard/q-and-a-fetch-msg?msg_id=0003nk">his slopegraphs page</a>. Support for displaying each row discretely (as in the original example) still to come.
+      This example copies data from ET's cancer sample from <a href="http://www.edwardtufte.com/bboard/q-and-a-fetch-msg?msg_id=0003nk">his slopegraphs page</a>. Uses color options for any positive change in numbers, or any decline > 10 in a single slope. Support for displaying each row discretely (as in the original example) still to come.
     </div>
     <div class=center>
       <svg id="etcancer" style="background-color:#fff; width:550px" height=805></svg>
@@ -543,7 +543,7 @@
               'offsetY':45, // offsetY expects a width to also be passed, defaults to 600
               'doc':'Estimates of % survival rates, per 5 years',
               'rowsCross':false,
-              'lineColorHi':'#9BF',
+              'lineColorHi':'#6ec',
               'lineColorLo':'#f92',
               'lineColorLoThreshold':-10,
            });
@@ -576,7 +576,7 @@
               'rowCurve':'log',
               //'debugGrid' : true,
               'decimals':2,
-              'doc':'GDP by country (log scale) \nfor years 1970 & 1979 \n[(world bank data)http://data.worldbank.org/indicator/NY.GDP.MKTP.CD]',
+              'doc':'GDP by country (log scale) \nyears 1970 & 1979 \n[(world bank data)http://data.worldbank.org/indicator/NY.GDP.MKTP.CD]',
               'offsetX':75,
            });
         </script>
