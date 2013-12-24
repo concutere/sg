@@ -600,6 +600,7 @@
       ael.setAttributeNS("http://www.w3.org/1999/xlink", 'xlink:show', 'new');
       var tel = newEl(ael, 'text', atts);
       tel.textContent = text;
+      at(tel,'text-decoration', 'underline');
     }
   }
 }
