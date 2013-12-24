@@ -91,7 +91,7 @@
       sg.offsetX = isNaN(settings.offsetX)                    ? 0 : settings.offsetX;
       sg.offsetY = isNaN(settings.offsetY)                    ? 0 : settings.offsetY;
       if(!isEmpty(settings.rowCurve)) sg.rowCurve = settings.rowCurve;
-      if (settings.debugGrid === true) sg.debugGrid = true;
+      sg.debugGrid = settings.debugGrid === true;
       if (!isEmpty(settings.doc)) sg.doc = settings.doc;
       if (!isNaN(settings.width)) sg.width = settings.width;
       if (!isNaN(settings.decimals)) sg.decimals = settings.decimals;
@@ -452,8 +452,10 @@
     (ie 'font-weight:bold')
   ***/
   function newEl(parent, type, atts) { 
-    return newElNS("http://www.w3.org/2000/svg", parent, type, 
-              Array.prototype.slice.call(arguments, 2));
+    return newElNS("http://www.w3.org/2000/svg", parent, type,  
+              atts && Object.prototype.toString.call( atts ) === '[object Array]' ?
+                  atts : 
+                  Array.prototype.slice.call(arguments, 2));
   }
   
   function newElNS(ns, parent, type, atts) {
@@ -539,6 +541,11 @@
     return parent;
   }
   
+  function atNS(ns, parent, name, value) {
+    parent.setAttributeNS(ns, name, value);
+    return parent;
+  }
+  
   function defaultSettings() {
     return {
           'fontSize'   : '14',                        
@@ -556,14 +563,25 @@
     return text == undefined || text.toString().length <  1;
   }
   function docBox(parent, doc, svgWidth, offsetX, offsetY, y, rowHeight, font, fontSize, fontColor) {
+    if (isEmpty(doc)) return;
+
     if (offsetX > 0) {
       var docw = offsetX - 10; //todo parameterize outer border or just use padding in style?
       var docel;
       var doclines = doc.split('\n');
       var docy = y + rowHeight;
       for (var i = 0; i < doclines.length; i++) {
-        docel = newEl(parent,'text','x',10,'y', docy,'width',docw,'height',rowHeight,'font-family',font,'font-size',fontSize, 'fill', fontColor);
-        docel.textContent = doclines[i];
+        var pos = doclines[i].indexOf('[(');
+        if (pos >= 0) {
+          var tpos = doclines[i].indexOf(')', pos);
+          var text = doclines[i].substr(pos+2, tpos-2);
+          var href = doclines[i].substr(tpos+1, doclines[i].indexOf(']', tpos)-tpos-1);
+          link(parent, href, text,['x',10,'y', docy,'width',docw,'height',rowHeight,'font-family',font,'font-size',fontSize, 'fill', fontColor]);
+        }
+        else {
+          docel = newEl(parent,'text','x',10,'y', docy,'width',docw,'height',rowHeight,'font-family',font,'font-size',fontSize, 'fill', fontColor);
+          docel.textContent = doclines[i];
+        }
         docy+=rowHeight;
       }
     }
@@ -574,6 +592,14 @@
       var docel = newEl(parent,'text','x',10,'y', rowHeight,'height',doch,'font-family',font,'font-size',fontSize, 'fill', fontColor);
       docel.textContent = doc;
       at(docel,'x',centerText(docel,svgWidth,10));
+    }
+    
+    function link(parent, href, text, atts) {
+      var ael = newEl(parent, 'a');
+      ael.setAttributeNS("http://www.w3.org/1999/xlink", 'xlink:href', href);
+      ael.setAttributeNS("http://www.w3.org/1999/xlink", 'xlink:show', 'new');
+      var tel = newEl(ael, 'text', atts);
+      tel.textContent = text;
     }
   }
 }
