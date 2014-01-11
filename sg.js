@@ -122,7 +122,7 @@
           svgEl.removeChild(el);
         }
         //todo increase total wait time (at least for mobile slowness)?
-        if (++cnt < 100 && vals[0] != vals[1]) {
+        if (++cnt < 1234 && vals[0] != vals[1]) {
           window.setTimeout(inGraphWithFonts, 11);
         }
         else {

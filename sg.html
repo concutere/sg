@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
+  <!--link href='http://fonts.googleapis.com/css?family=Cabin' rel='stylesheet' type='text/css'-->
     <title>SG.js - Slopegraphs for the web</title>
     <script type="text/javascript" src="sg.js">
     </script>
@@ -491,7 +492,9 @@
   <a href="https://github.com/concutere/sg"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png" alt="Fork me on GitHub"></a>
     <div class="huge center">SG.js - Slopegraph samples</div>
     <div class="sub">
-      This example copies data from ET's GDP sample from <a href="http://www.edwardtufte.com/bboard/q-and-a-fetch-msg?msg_id=0003nk">his slopegraphs page</a>.
+      This example copies data from ET's GDP sample from <a href="http://www.edwardtufte.com/bboard/q-and-a-fetch-msg?msg_id=0003nk">his slopegraphs page</a>. 
+      <br>
+      You can play with this example at <a href="http://jsfiddle.net/catG2/3/">http://jsfiddle.net/catG2/3/</a>
     </div>
     <div class=center>
       <svg id="etgdp" style="background-color:#eef; width:650px" height=905></svg>
@@ -530,7 +533,7 @@
               'gutterWidth':5,
               'lineSize':1, 
               'lineOpacity':1,
-              'lineColor':'#bbb', 
+              'lineColor':'#aaa', 
               'fontColor':'#234',
               'waitFont':'Cabin,"Courier New"',
               //'resize':true,
@@ -543,9 +546,6 @@
               'offsetY':45, // offsetY expects a width to also be passed, defaults to 600
               'doc':'Estimates of % survival rates, per 5 years',
               'rowsCross':false,
-              'lineColorHi':'#6ec',
-              'lineColorLo':'#f92',
-              'lineColorLoThreshold':-10,
            });
         </script>
       </div>
@@ -576,14 +576,14 @@
               'rowCurve':'log',
               //'debugGrid' : true,
               'decimals':2,
-              'doc':'GDP by country (log scale) \nyears 1970 & 1979 \n[(world bank data)http://data.worldbank.org/indicator/NY.GDP.MKTP.CD]',
+              'doc':'GDP by country (log scale) \nYears 1970 & 1979 \n[(World bank data)http://data.worldbank.org/indicator/NY.GDP.MKTP.CD]',
               'offsetX':75,
            });
         </script>
       </div>
       <p><hr><p>
           <div class="sub">
-        This sample uses contrived data for testing new features
+        This sample uses contrived data for testing new features. Currently showing differing colors for hi/lo slopes.
       </div>
     <div class=center>
        <svg id="sample" style="background-color:lightyellow; width:800px" height=405></svg>
@@ -609,6 +609,9 @@
             'height':400,
             'textWidth':10, //setting to 0 can throw off alignment of val-only columns
             'sortVals':'up',
+                          'lineColorHi':'#6ec',
+              'lineColorLo':'#f92',
+              'lineColorLoThreshold':-10,
           });
     </script>
     </div>
