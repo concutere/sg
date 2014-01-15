@@ -263,6 +263,7 @@
     var y = sg.offsetY > 0 ? sg.offsetY : sg.rowh * 2; // padding + headers
     var oy = y;
     var set;
+    var setlabel;
     var lastval;
     var el;
     var lastset = [];
@@ -288,6 +289,7 @@
           x += maxtw + sg.slopew + sg.gutterw * 2;
         }
         set = d.set;
+        setlabel = d.setLabel || d.set;
         y = oy; 
         lastval = undefined;
         lastset = thisset;
@@ -401,9 +403,9 @@
         at(g, 'width', maxtw);
         var sety = sg.offsetY > 0 ? sg.offsetY : sg.rowh;
         var setEl = newEl(g, 'text',    
-                      'id','set'+set, 'y', sety, 
+                      'id','set'+ set, 'y', sety, 
                       'font-family', sg.font,'font-size', sg.fontSize+2, 'fill', sg.fontColor);
-        setEl.textContent = set;
+        setEl.textContent = setlabel;
         var htw = setEl.getComputedTextLength();
         var fnx = center;
         if (setcnt == 1) {
